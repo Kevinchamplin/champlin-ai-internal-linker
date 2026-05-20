@@ -191,9 +191,18 @@ final class AnchorExtractor
     }
 
     /**
-     * Try to keep the anchor short and on-topic. If the target's title appears
-     * inside the chosen sentence (case-insensitive), use that exact substring.
-     * Otherwise return the first ≤ 80 chars of the sentence.
+     * Pick the anchor text that the editor sidebar will try to wrap in place.
+     *
+     * Goal: return a string that is a LITERAL substring of the source post's
+     * content, so the editor can find-and-link it without manual editing.
+     *
+     * Strategy, in order:
+     *   1. If the target's title appears verbatim in the source sentence,
+     *      return that exact substring (best: anchor reads as the linked
+     *      page's title, in the editor's own prose).
+     *   2. Otherwise, return the first 80 characters of the source sentence
+     *      trimmed at the nearest word boundary — no ellipsis, since an
+     *      ellipsis would break the literal substring guarantee.
      */
     private function trim_to_phrase(string $sentence, WP_Post $target): string
     {
@@ -208,6 +217,13 @@ final class AnchorExtractor
         if (mb_strlen($sentence) <= 80) {
             return $sentence;
         }
-        return rtrim(mb_substr($sentence, 0, 77)) . '…';
+        // Trim to <=80 chars at the last word boundary so the result remains
+        // a clean substring of the original sentence (no ellipsis).
+        $window = mb_substr($sentence, 0, 80);
+        $last_space = mb_strrpos($window, ' ');
+        if ($last_space !== false && $last_space >= 20) {
+            return rtrim(mb_substr($window, 0, $last_space));
+        }
+        return rtrim($window);
     }
 }

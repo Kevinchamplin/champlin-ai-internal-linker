@@ -119,11 +119,40 @@ function InternalLinkerSidebar() {
     }, [isSavedPost, fetchSuggestions]);
 
     const insertLink = useCallback((s) => {
-        const html = `<!-- wp:paragraph --><p><a href="${s.permalink}" title="${s.title.replace(/"/g, '&quot;')}">${s.suggested_anchor || s.title}</a></p><!-- /wp:paragraph -->`;
-        const block = wp.blocks.rawHandler({ HTML: html });
-        if (block && block.length > 0) {
-            insertBlock(block[0]);
+        const anchor = String(s.suggested_anchor || s.title || '').trim();
+        const url = String(s.permalink || '');
+        if (anchor === '' || url === '') return;
+
+        const result = wrapAnchorInExistingBlocks(anchor, url, s.title);
+        const noticesDispatch = wp.data.dispatch('core/notices');
+
+        if (result.inserted) {
+            // Highlight the modified block so the user sees the change.
+            wp.data.dispatch('core/block-editor').selectBlock(result.blockId);
+            if (noticesDispatch && noticesDispatch.createSuccessNotice) {
+                noticesDispatch.createSuccessNotice(
+                    sprintf(__('Linked "%1$s" → %2$s', PLUGIN_NAME), result.matchedText, s.title),
+                    { type: 'snackbar', isDismissible: true }
+                );
+            }
+        } else {
+            // Fallback: append at the end so the user still gets a working link
+            // they can move/rephrase. Notice tells them why.
+            const safeUrl = url.replace(/"/g, '&quot;');
+            const safeTitle = String(s.title || '').replace(/"/g, '&quot;');
+            const html = `<!-- wp:paragraph --><p>Related: <a href="${safeUrl}" title="${safeTitle}">${anchor}</a></p><!-- /wp:paragraph -->`;
+            const block = wp.blocks.rawHandler({ HTML: html });
+            if (block && block.length > 0) {
+                insertBlock(block[0]);
+            }
+            if (noticesDispatch && noticesDispatch.createInfoNotice) {
+                noticesDispatch.createInfoNotice(
+                    sprintf(__('Anchor "%s" wasn\'t in your draft — added as a "Related" link at the end. Move or edit freely.', PLUGIN_NAME), anchor),
+                    { type: 'snackbar', isDismissible: true }
+                );
+            }
         }
+
         apiFetch({
             path: `/${cfg.restNamespace}/suggestions/${postId}/accept`,
             method: 'POST',
@@ -131,6 +160,80 @@ function InternalLinkerSidebar() {
         });
         setSuggestions((prev) => prev.filter((row) => row.post_id !== s.post_id));
     }, [insertBlock, postId]);
+
+    /**
+     * Walk the block tree (paragraphs, headings, lists, quotes, columns/groups
+     * inner blocks) looking for a block whose content contains the anchor as
+     * plain text (case-insensitive). Wrap the first viable match in an
+     * <a href> and update the block in place.
+     *
+     * Skips:
+     *   - Anchor already inside an <a>…</a>
+     *   - Anchor inside an HTML attribute
+     *
+     * Returns { inserted: bool, blockId?, matchedText? }.
+     */
+    function wrapAnchorInExistingBlocks(anchor, url, targetTitle) {
+        const blocks = wp.data.select('core/block-editor').getBlocks();
+        const result = walk(blocks);
+        return result;
+
+        function walk(blockList) {
+            for (const block of blockList) {
+                const editableAttrs = ['content', 'value', 'caption', 'text', 'citation'];
+                for (const attr of editableAttrs) {
+                    const content = block.attributes?.[attr];
+                    if (typeof content !== 'string' || content === '') continue;
+                    const wrapped = tryWrapInContent(content, anchor, url, targetTitle);
+                    if (wrapped) {
+                        const patch = {};
+                        patch[attr] = wrapped.newContent;
+                        wp.data.dispatch('core/block-editor').updateBlockAttributes(block.clientId, patch);
+                        return { inserted: true, blockId: block.clientId, matchedText: wrapped.matchedText };
+                    }
+                }
+                if (block.innerBlocks && block.innerBlocks.length > 0) {
+                    const inner = walk(block.innerBlocks);
+                    if (inner.inserted) return inner;
+                }
+            }
+            return { inserted: false };
+        }
+    }
+
+    function tryWrapInContent(content, anchor, url, targetTitle) {
+        const lowerContent = content.toLowerCase();
+        const lowerAnchor = anchor.toLowerCase();
+        let pos = lowerContent.indexOf(lowerAnchor);
+        while (pos >= 0) {
+            if (isInsideExistingAnchor(content, pos) || isInsideTag(content, pos)) {
+                pos = lowerContent.indexOf(lowerAnchor, pos + 1);
+                continue;
+            }
+            const before = content.substring(0, pos);
+            const matched = content.substring(pos, pos + anchor.length);
+            const after = content.substring(pos + anchor.length);
+            const safeUrl = url.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+            const safeTitle = String(targetTitle || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+            const newContent = `${before}<a href="${safeUrl}" title="${safeTitle}">${matched}</a>${after}`;
+            return { newContent, matchedText: matched };
+        }
+        return null;
+    }
+
+    function isInsideExistingAnchor(content, position) {
+        const before = content.substring(0, position).toLowerCase();
+        const lastOpen = before.lastIndexOf('<a ');
+        const lastClose = before.lastIndexOf('</a>');
+        return lastOpen > lastClose;
+    }
+
+    function isInsideTag(content, position) {
+        const before = content.substring(0, position);
+        const lastLt = before.lastIndexOf('<');
+        const lastGt = before.lastIndexOf('>');
+        return lastLt > lastGt;
+    }
 
     return createElement(Fragment, null,
         createElement(PluginSidebarMoreMenuItem, { target: 'cil-sidebar', icon: 'admin-links' },
