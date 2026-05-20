@@ -166,6 +166,14 @@ final class Plugin
 
         // i18n.
         add_action('init', [$this, 'load_textdomain']);
+
+        /**
+         * Fires after Free has registered its core hooks. Pro add-ons listen for
+         * this to register their own services, hooks, and admin sub-pages.
+         *
+         * @param Plugin $plugin The Free plugin container instance.
+         */
+        do_action('cil_plugin_loaded', $this);
     }
 
     public function load_textdomain(): void

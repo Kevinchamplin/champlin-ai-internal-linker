@@ -51,6 +51,24 @@ final class ProviderFactory
         $settings = self::settings();
         $provider = (string) ($settings['provider'] ?? 'openai');
 
+        /**
+         * Filter the resolved embedding provider before instantiation.
+         *
+         * Pro add-ons hook here to supply a HostedProvider when a valid
+         * license key is present, swapping in our hosted /api/embed proxy
+         * without the user having to manage an OpenAI key.
+         *
+         * Return `null` to use the default Free-tier resolver below.
+         *
+         * @param ProviderInterface|null $override Pre-built provider, or null.
+         * @param string                 $provider The configured provider slug.
+         * @param array                  $settings Current cil_settings.
+         */
+        $override = apply_filters('cil_provider', null, $provider, $settings);
+        if ($override instanceof ProviderInterface) {
+            return $override;
+        }
+
         return match ($provider) {
             'openai' => new OpenAIProvider(
                 (string) $settings['api_key'],

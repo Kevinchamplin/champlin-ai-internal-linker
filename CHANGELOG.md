@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-05-20, sprint-2-day-1-hook-surface) [0.75h]
+- **Extension hooks** for the Pro plugin and community add-ons. Six new hooks comprising the public Pro API contract:
+  - `cil_plugin_loaded` (action) — Pro registers its services after Free is wired up.
+  - `cil_extra_excluded_ids` (filter) — further narrow which candidates can appear.
+  - `cil_rank_results` (filter) — boost / re-rank / filter cosine-ranked candidates (Money Pages, focus-keyword boost).
+  - `cil_suggestion_row` (filter) — attach extra per-row display data (badges, click predictions).
+  - `cil_provider` (filter) — swap in `HostedProvider` when a Premium license is present.
+  - `cil_settings_sanitized` (filter) — Pro extends the settings array.
+- New `docs/HOOKS.md` documents the contract as the public Pro API surface. Hook names + signatures versioned at MAJOR; removals/renames bump 1.x → 2.0.
+- All 29 unit tests still green. No behavior change for the Free plugin (every hook is a pure `apply_filters` / `do_action` callout with default pass-through semantics).
+
 ### Added (2026-05-20, sprint-1-free-tier-parity) [2.5h]
 - **Orphan Pages report** — new Reports admin sub-page lists every published post with zero internal links pointing to it. Backed by `LinkGraphScanner` (regex parse + `url_to_postid` resolution) and `OrphanReport`. 6h transient cache, auto-invalidated on `save_post` / `before_delete_post`. Manual "Re-scan now" button + nonce-protected.
 - **Ignore lists** — `ignored_post_ids` (CSV of post IDs) and `ignored_term_ids` (CSV of category term IDs, includes children) added to the Settings screen. Merged into `SuggestionEngine` exclusion set at suggestion time.

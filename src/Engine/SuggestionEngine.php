@@ -43,12 +43,26 @@ final class SuggestionEngine
         $ignored_terms   = (array) ($settings['ignored_term_ids'] ?? []);
         $term_excluded   = $this->expand_term_exclusions($ignored_terms, (array) ($settings['post_types'] ?? ['post']));
 
-        $excluded = array_values(array_unique(array_merge(
+        $base_excluded = array_values(array_unique(array_merge(
             [$source_post_id],
             array_map('intval', $exclude_ids),
             array_map('intval', $ignored_posts),
             $term_excluded
         )));
+
+        /**
+         * Filter the set of excluded candidate post IDs for a suggestion query.
+         *
+         * Pro add-ons hook here to inject feature-specific exclusions (e.g.
+         * "Money Pages" that should never be hidden from suggestions, or
+         * orphan-only mode that excludes well-linked posts).
+         *
+         * @param int[]   $excluded       Post IDs to skip during ranking.
+         * @param int     $source_post_id The post the user is editing.
+         * @param array   $settings       Current cil_settings option.
+         */
+        $excluded = (array) apply_filters('cil_extra_excluded_ids', $base_excluded, $source_post_id, $settings);
+        $excluded = array_values(array_unique(array_map('intval', $excluded)));
 
         $ranked = $this->cosine->rank(
             $source['vector'],
@@ -56,6 +70,24 @@ final class SuggestionEngine
             $threshold,
             $limit
         );
+
+        /**
+         * Filter the ranked candidate list before per-candidate post lookup and
+         * anchor extraction.
+         *
+         * Pro add-ons hook here to:
+         *   - boost Money Pages above their pure-cosine rank
+         *   - inject focus-keyword match bonuses
+         *   - downrank candidates by penalty rules
+         *
+         * Each entry is shaped `['post_id' => int, 'similarity' => float]`.
+         * Implementations must preserve that shape; re-sort if scores change.
+         *
+         * @param array $ranked          Cosine-ranked candidates, descending.
+         * @param int   $source_post_id  The post the user is editing.
+         * @param array $settings        Current cil_settings option.
+         */
+        $ranked = (array) apply_filters('cil_rank_results', $ranked, $source_post_id, $settings);
 
         $keyword_reader = $this->keyword_reader ?? new TargetKeywordReader();
 
@@ -69,7 +101,7 @@ final class SuggestionEngine
             $keyword   = $keyword_reader->keyword_for($row['post_id']);
             $kw_source = $keyword === '' ? '' : $keyword_reader->source_for($row['post_id']);
 
-            $results[] = [
+            $row_out = [
                 'post_id'                => $row['post_id'],
                 'title'                  => (string) $post->post_title,
                 'permalink'              => (string) get_permalink($post),
@@ -79,6 +111,17 @@ final class SuggestionEngine
                 'target_keyword'         => $keyword,
                 'target_keyword_source'  => $kw_source,
             ];
+            /**
+             * Filter a single suggestion row before it's added to the response.
+             *
+             * Pro add-ons hook here to attach extra display data (badges, click
+             * predictions, broken-link warnings).
+             *
+             * @param array $row_out Suggestion row shape — must preserve the keys above.
+             * @param array $row     Original ranked entry (post_id + similarity).
+             * @param int   $source_post_id
+             */
+            $results[] = (array) apply_filters('cil_suggestion_row', $row_out, $row, $source_post_id);
         }
 
         return $results;

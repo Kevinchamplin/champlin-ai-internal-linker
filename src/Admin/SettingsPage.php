@@ -101,7 +101,7 @@ final class SettingsPage
             static fn(int $id): bool => $id > 0
         )));
 
-        return [
+        $sanitized = [
             'provider'         => $provider !== '' ? $provider : 'openai',
             'model'            => $model !== '' ? $model : 'text-embedding-3-small',
             'api_key'          => $api_key,
@@ -111,6 +111,18 @@ final class SettingsPage
             'ignored_post_ids' => $ignored_post_ids,
             'ignored_term_ids' => $ignored_term_ids,
         ];
+
+        /**
+         * Filter the sanitized settings array before save.
+         *
+         * Pro add-ons hook here to sanitize their own added fields (license
+         * key, Money Page IDs, auto-link rules, etc.) without having to
+         * intercept the WP option_update_* hooks.
+         *
+         * @param array $sanitized Sanitized settings ready to persist.
+         * @param array $input     Raw (un-sanitized) input from the settings form.
+         */
+        return (array) apply_filters('cil_settings_sanitized', $sanitized, is_array($input) ? $input : []);
     }
 
     public function render(): void
