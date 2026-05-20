@@ -4,7 +4,7 @@ Tags: internal links, seo, embeddings, ai, suggestions
 Requires at least: 6.4
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -84,6 +84,11 @@ GitHub: https://github.com/Kevinchamplin/champlin-ai-internal-linker
 3. Bulk re-index progress UI.
 
 == Changelog ==
+
+= 1.0.1 =
+* Fix: AnchorExtractor now batches all source-sentence embeddings into a single OpenAI call and uses the target post's already-stored vector for ranking, replacing ~100 sequential API calls with 1. Suggestions endpoint p95 drops from ~100s to <1s.
+* Add: Source-sentence vectors cached in a 12-hour transient keyed by content hash; subsequent suggestion calls on the same draft are <50ms.
+* Add: `ProviderInterface::embed_batch()` for batched embedding requests.
 
 = 1.0.0 =
 * Initial release.

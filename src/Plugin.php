@@ -88,7 +88,8 @@ final class Plugin
         $this->anchor_extractor  = new AnchorExtractor(
             $this->provider_factory,
             $this->cosine,
-            $this->normalizer
+            $this->normalizer,
+            $this->vector_store
         );
         $this->suggestion_engine = new SuggestionEngine(
             $this->vector_store,

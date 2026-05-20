@@ -51,10 +51,23 @@ final class OpenAIProvider implements ProviderInterface
         if (trim($text) === '') {
             throw new RuntimeException('Cannot embed empty text.');
         }
+        $batch = $this->embed_batch([$text]);
+        return $batch[0] ?? [];
+    }
+
+    public function embed_batch(array $texts): array
+    {
+        $clean = array_values(array_filter(
+            array_map('strval', $texts),
+            static fn(string $t): bool => trim($t) !== ''
+        ));
+        if ($clean === []) {
+            return [];
+        }
 
         $body = wp_json_encode([
             'model' => $this->model,
-            'input' => $text,
+            'input' => $clean,
         ]);
 
         if ($body === false) {
@@ -79,7 +92,7 @@ final class OpenAIProvider implements ProviderInterface
                 $raw  = (string) wp_remote_retrieve_body($response);
 
                 if ($code >= 200 && $code < 300) {
-                    return $this->parse_vector($raw);
+                    return $this->parse_batch($raw, count($clean));
                 }
 
                 // Retry on transient failures only.
@@ -102,14 +115,33 @@ final class OpenAIProvider implements ProviderInterface
     }
 
     /**
-     * @return float[]
+     * @return float[][]
      */
-    private function parse_vector(string $raw): array
+    private function parse_batch(string $raw, int $expected): array
     {
         $decoded = json_decode($raw, true);
-        if (!is_array($decoded) || !isset($decoded['data'][0]['embedding']) || !is_array($decoded['data'][0]['embedding'])) {
-            throw new RuntimeException('OpenAI response missing embedding payload.');
+        if (!is_array($decoded) || !isset($decoded['data']) || !is_array($decoded['data'])) {
+            throw new RuntimeException('OpenAI response missing data payload.');
         }
-        return array_map(static fn($v): float => (float) $v, $decoded['data'][0]['embedding']);
+        if (count($decoded['data']) !== $expected) {
+            throw new RuntimeException(sprintf(
+                'OpenAI returned %d embeddings, expected %d.',
+                count($decoded['data']),
+                $expected
+            ));
+        }
+
+        // Sort by 'index' to guarantee input-order alignment (OpenAI usually returns
+        // them in order, but the API doesn't guarantee it).
+        usort($decoded['data'], static fn(array $a, array $b): int => ($a['index'] ?? 0) <=> ($b['index'] ?? 0));
+
+        $vectors = [];
+        foreach ($decoded['data'] as $row) {
+            if (!isset($row['embedding']) || !is_array($row['embedding'])) {
+                throw new RuntimeException('OpenAI response row missing embedding.');
+            }
+            $vectors[] = array_map(static fn($v): float => (float) $v, $row['embedding']);
+        }
+        return $vectors;
     }
 }

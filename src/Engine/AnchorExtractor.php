@@ -2,10 +2,17 @@
 /**
  * Pick the best anchor phrase from the source post for linking to a target.
  *
- * Strategy: embed the target's (title + excerpt), embed each candidate
- * sentence in the source, return the sentence with the highest cosine
- * similarity to the target. Falls back to the target title if either
- * embedding step fails (no API key, network error, etc.).
+ * Strategy:
+ *   1. Embed every sentence in the source post ONCE per source (batched in a
+ *      single OpenAI call, cached in a transient keyed by content_hash).
+ *   2. For each target, compare those pre-computed source-sentence vectors
+ *      against the target's already-stored full-content embedding from the
+ *      vector store. Pick the sentence with the highest cosine.
+ *
+ * This is much cheaper than the naive approach (no per-target embedding,
+ * no per-sentence API call). For an N-target / M-sentence source post:
+ *   - Old:   N × M sequential embed() calls (~100 calls = 100 seconds)
+ *   - New:   1 batched embed_batch() call regardless of N × M
  *
  * The anchor_offset is a character offset within the SOURCE's raw post_content
  * (not normalized content) where the chosen sentence begins. The block-editor
@@ -21,15 +28,25 @@ namespace Champlin\InternalLinker\Engine;
 use Champlin\InternalLinker\Embeddings\ProviderFactory;
 use Champlin\InternalLinker\Indexing\ContentNormalizer;
 use Champlin\InternalLinker\Similarity\CosineCalculator;
+use Champlin\InternalLinker\Storage\VectorStore;
 use Throwable;
 use WP_Post;
 
 final class AnchorExtractor
 {
+    private const TRANSIENT_PREFIX = 'cil_src_sent_';
+    private const TRANSIENT_TTL    = HOUR_IN_SECONDS * 12;
+
+    /**
+     * @var array<int, array{sentences: string[], vectors: float[][], offsets: int[]}>
+     */
+    private array $source_cache = [];
+
     public function __construct(
         private ProviderFactory $provider_factory,
         private CosineCalculator $cosine,
-        private ContentNormalizer $normalizer
+        private ContentNormalizer $normalizer,
+        private ?VectorStore $vector_store = null
     ) {
     }
 
@@ -40,82 +57,137 @@ final class AnchorExtractor
     {
         $source = get_post($source_post_id);
         $target = get_post($target_post_id);
-
         if (!$source instanceof WP_Post || !$target instanceof WP_Post) {
             return ['anchor' => '', 'offset' => 0];
         }
 
         $fallback = ['anchor' => $this->title_phrase($target), 'offset' => 0];
 
-        if (!$this->provider_factory->is_configured()) {
+        if ($this->vector_store === null) {
             return $fallback;
         }
 
-        $normalized = $this->normalizer->normalize($source->post_content);
-        $sentences  = $this->normalizer->sentences($normalized);
-        if ($sentences === []) {
-            return $fallback;
-        }
-
-        $target_text = trim(($target->post_title ?: '') . '. ' . $this->target_excerpt($target));
-        if ($target_text === '') {
+        // Use the target's already-stored full-content embedding rather than
+        // re-embedding the title+excerpt — saves an API call per target.
+        $target_row = $this->vector_store->get($target_post_id);
+        if ($target_row === null) {
             return $fallback;
         }
 
         try {
-            $provider       = $this->provider_factory->create();
-            $target_vector  = $provider->embed($target_text);
-
-            $best_score    = -INF;
-            $best_sentence = $this->title_phrase($target);
-            foreach ($sentences as $sentence) {
-                if (mb_strlen($sentence) < 12) {
-                    continue;
-                }
-                $score = $this->cosine->similarity($target_vector, $provider->embed($sentence));
-                if ($score > $best_score) {
-                    $best_score    = $score;
-                    $best_sentence = $sentence;
-                }
-            }
-
-            $offset = $this->offset_in_source($source->post_content, $best_sentence);
-
-            return [
-                'anchor' => $this->trim_to_phrase($best_sentence, $target),
-                'offset' => $offset,
-            ];
+            $bundle = $this->source_bundle($source);
         } catch (Throwable $e) {
-            error_log('[champlin-internal-linker] anchor extraction failed: ' . $e->getMessage());
+            error_log('[champlin-internal-linker] anchor source-bundle failed: ' . $e->getMessage());
             return $fallback;
         }
+        if ($bundle === null || $bundle['vectors'] === []) {
+            return $fallback;
+        }
+
+        $best_score = -INF;
+        $best_index = -1;
+        foreach ($bundle['vectors'] as $i => $sentence_vector) {
+            $score = $this->cosine->similarity($target_row['vector'], $sentence_vector);
+            if ($score > $best_score) {
+                $best_score = $score;
+                $best_index = $i;
+            }
+        }
+
+        if ($best_index < 0) {
+            return $fallback;
+        }
+
+        $best_sentence = $bundle['sentences'][$best_index];
+        $best_offset   = $bundle['offsets'][$best_index];
+
+        return [
+            'anchor' => $this->trim_to_phrase($best_sentence, $target),
+            'offset' => $best_offset,
+        ];
+    }
+
+    /**
+     * Compute (or fetch from transient) the source post's per-sentence
+     * embeddings. One batched OpenAI call covers all sentences.
+     *
+     * @return array{sentences: string[], vectors: float[][], offsets: int[]}|null
+     */
+    private function source_bundle(WP_Post $source): ?array
+    {
+        $source_id = (int) $source->ID;
+        if (isset($this->source_cache[$source_id])) {
+            return $this->source_cache[$source_id];
+        }
+
+        $raw_content = (string) $source->post_content;
+        $normalized  = $this->normalizer->normalize($raw_content);
+        $hash        = $this->normalizer->hash($normalized);
+
+        $transient_key = self::TRANSIENT_PREFIX . $source_id . '_' . substr($hash, 0, 16);
+        $cached        = get_transient($transient_key);
+        if (is_array($cached) && isset($cached['sentences'], $cached['vectors'], $cached['offsets'])) {
+            $this->source_cache[$source_id] = $cached;
+            return $cached;
+        }
+
+        $sentences = array_values(array_filter(
+            $this->normalizer->sentences($normalized),
+            static fn(string $s): bool => mb_strlen($s) >= 12
+        ));
+        if ($sentences === []) {
+            return null;
+        }
+
+        // Cap to a sane upper bound to keep batched API calls fast even on
+        // very long posts. ~80 sentences ≈ a ~1500-word draft.
+        if (count($sentences) > 80) {
+            $sentences = array_slice($sentences, 0, 80);
+        }
+
+        if (!$this->provider_factory->is_configured()) {
+            return null;
+        }
+
+        $provider = $this->provider_factory->create();
+        $vectors  = $provider->embed_batch($sentences);
+        if (count($vectors) !== count($sentences)) {
+            return null;
+        }
+
+        $offsets = $this->locate_offsets($raw_content, $sentences);
+
+        $bundle = [
+            'sentences' => $sentences,
+            'vectors'   => $vectors,
+            'offsets'   => $offsets,
+        ];
+
+        set_transient($transient_key, $bundle, self::TRANSIENT_TTL);
+        $this->source_cache[$source_id] = $bundle;
+
+        return $bundle;
+    }
+
+    /**
+     * @param string[] $sentences
+     * @return int[]
+     */
+    private function locate_offsets(string $raw_content, array $sentences): array
+    {
+        $collapsed = preg_replace('/\s+/u', ' ', $raw_content) ?? $raw_content;
+        $offsets   = [];
+        foreach ($sentences as $sentence) {
+            $needle = trim(preg_replace('/\s+/u', ' ', mb_substr($sentence, 0, 60)) ?? '');
+            $pos    = $needle === '' ? false : mb_stripos($collapsed, $needle);
+            $offsets[] = $pos === false ? 0 : (int) $pos;
+        }
+        return $offsets;
     }
 
     private function title_phrase(WP_Post $target): string
     {
         return trim((string) $target->post_title);
-    }
-
-    private function target_excerpt(WP_Post $target): string
-    {
-        $excerpt = trim((string) $target->post_excerpt);
-        if ($excerpt !== '') {
-            return $excerpt;
-        }
-        $normalized = $this->normalizer->normalize($target->post_content);
-        return mb_substr($normalized, 0, 400);
-    }
-
-    private function offset_in_source(string $raw_content, string $sentence): int
-    {
-        // Fuzzy locate: collapse whitespace in both, search for the first 60 chars.
-        $needle = trim(preg_replace('/\s+/u', ' ', mb_substr($sentence, 0, 60)) ?? '');
-        if ($needle === '') {
-            return 0;
-        }
-        $haystack = preg_replace('/\s+/u', ' ', $raw_content) ?? $raw_content;
-        $pos      = mb_stripos($haystack, $needle);
-        return $pos === false ? 0 : (int) $pos;
     }
 
     /**

@@ -25,6 +25,20 @@ interface ProviderInterface
      */
     public function embed(string $text): array;
 
+    /**
+     * Compute embeddings for a batch of inputs in a single API call.
+     *
+     * The returned array is index-aligned with the input array. Implementations
+     * that don't support native batching may fall back to sequential `embed()`
+     * calls, but the contract is one logical operation per call.
+     *
+     * @param string[] $texts
+     * @return float[][]
+     *
+     * @throws \RuntimeException When any input fails to embed.
+     */
+    public function embed_batch(array $texts): array;
+
     public function model(): string;
 
     public function dimensions(): int;

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-05-20, anchor-extractor-batching) [1h]
+- AnchorExtractor was making ~100 sequential OpenAI calls per suggestion fetch (one `embed()` per source sentence per target). Dogfood on crm.champlinenterprises.com with 82 posts measured 104,970 ms for one call.
+- Refactored: now batches all source sentences into a single `embed_batch()` request, and uses the target post's already-stored full-content vector from VectorStore for ranking instead of re-embedding its title+excerpt.
+- Added 12-hour transient cache keyed on `content_hash` for source-sentence vectors — subsequent suggestion calls on the same draft are <50 ms.
+- Added `ProviderInterface::embed_batch(array $texts): array` and `OpenAIProvider::embed_batch()`.
+- `OpenAIProvider::embed()` now delegates to `embed_batch([$text])` for a single code path.
+- Sane upper bound: sentences capped at 80 per source post to keep batched API calls fast on very long drafts.
+
 ### Added (2026-05-20, initial-scaffold) [3h]
 - Scaffold complete plugin per `/wp-plugin` skill workflow + senior-grade engineering scope.
 - Stack: PHP 8.1+ (strict types, PSR-4 under `Champlin\InternalLinker\`), WP 6.4+, MySQL, React (`@wordpress/scripts`), Tailwind, Action Scheduler.
