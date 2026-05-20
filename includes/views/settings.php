@@ -19,6 +19,19 @@ if (!defined('ABSPATH')) {
 $has_key = !empty($settings['api_key']);
 $threshold_label = (string) $settings['threshold'];
 $cil_version = defined('CIL_VERSION') ? CIL_VERSION : '';
+
+/**
+ * Allow Pro (or other add-ons) to override the provider summary when an
+ * external provider is active — e.g. "Hosted AI via Champlin Enterprises".
+ *
+ * @param array $summary { active: bool, label: string, hint: string }
+ */
+$provider_summary = (array) apply_filters('cil_provider_summary', [
+    'active' => false,
+    'label'  => '',
+    'hint'   => '',
+], $settings);
+$using_hosted_ai = !empty($provider_summary['active']);
 ?>
 <div class="wrap cil-wrap">
     <div class="cil-app">
@@ -33,7 +46,12 @@ $cil_version = defined('CIL_VERSION') ? CIL_VERSION : '';
                 <p class="cil-app-subtitle"><?php esc_html_e('These settings control how the plugin finds and ranks semantically related posts. Saved settings apply immediately — no rebuild required.', 'champlin-internal-linker'); ?></p>
             </div>
             <div class="cil-app-actions">
-                <?php if ($has_key) : ?>
+                <?php if ($using_hosted_ai) : ?>
+                    <span class="cil-pill cil-pill-premium" title="<?php echo esc_attr($provider_summary['hint'] ?? ''); ?>">
+                        <span class="cil-pill-dot"></span>
+                        <?php echo esc_html($provider_summary['label']); ?>
+                    </span>
+                <?php elseif ($has_key) : ?>
                     <span class="cil-pill cil-pill-success" title="<?php esc_attr_e('OpenAI API key configured', 'champlin-internal-linker'); ?>">
                         <span class="cil-pill-dot"></span> <?php esc_html_e('Connected', 'champlin-internal-linker'); ?>
                     </span>
@@ -78,6 +96,16 @@ $cil_version = defined('CIL_VERSION') ? CIL_VERSION : '';
                 </header>
 
                 <div class="cil-card-body">
+                    <?php if ($using_hosted_ai) : ?>
+                        <div class="cil-banner cil-banner-premium" style="margin-bottom: 1.25rem;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.39 7.36H22l-6.19 4.5L18.2 21 12 16.5 5.8 21l2.39-7.14L2 9.36h7.61z"/></svg>
+                            <p>
+                                <span class="cil-banner-title"><?php echo esc_html($provider_summary['label']); ?></span>
+                                <?php echo esc_html($provider_summary['hint']); ?>
+                            </p>
+                        </div>
+                    <?php endif; ?>
+
                     <div class="cil-field">
                         <label class="cil-field-label" for="cil-api-key">
                             <?php esc_html_e('OpenAI API key', 'champlin-internal-linker'); ?>
