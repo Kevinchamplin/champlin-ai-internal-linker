@@ -4,7 +4,7 @@ Tags: internal links, seo, embeddings, ai, suggestions
 Requires at least: 6.4
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.0.1
+Stable tag: 1.1.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -84,6 +84,14 @@ GitHub: https://github.com/Kevinchamplin/champlin-ai-internal-linker
 3. Bulk re-index progress UI.
 
 == Changelog ==
+
+= 1.1.0 =
+* Add: Orphan Pages report — every published post with zero internal links pointing to it, with one-click "Edit" + manual re-scan button. Cached in a 6h transient; auto-invalidated on save_post / before_delete_post.
+* Add: Ignore lists — exclude specific post IDs and/or whole category trees from suggestions via the Settings screen.
+* Add: Target keyword detection from Yoast SEO, Rank Math, All in One SEO, and SEOPress. Surfaced in the REST `/suggestions` response as `target_keyword` + `target_keyword_source`.
+* Add: Content extractor — runs `do_shortcode()` before normalization so shortcode-based page builders (Divi, WPBakery / Visual Composer, plus any custom shortcodes) get scanned. Falls back to raw content on errors or unexpectedly short output.
+* Add: REST routes `GET /cil/v1/reports/orphans` and `POST /cil/v1/reports/rescan` (admin capability).
+* Test: 11 new unit tests covering TargetKeywordReader and LinkGraphScanner. Total: 29 tests / 49 assertions.
 
 = 1.0.1 =
 * Fix: AnchorExtractor now batches all source-sentence embeddings into a single OpenAI call and uses the target post's already-stored vector for ranking, replacing ~100 sequential API calls with 1. Suggestions endpoint p95 drops from ~100s to <1s.

@@ -32,3 +32,41 @@ if (!defined('CIL_SLUG')) {
 if (!defined('CIL_DB_VERSION')) {
     define('CIL_DB_VERSION', '1');
 }
+
+// WordPress time constants used by Reports/* code paths.
+if (!defined('MINUTE_IN_SECONDS')) {
+    define('MINUTE_IN_SECONDS', 60);
+}
+if (!defined('HOUR_IN_SECONDS')) {
+    define('HOUR_IN_SECONDS', 60 * 60);
+}
+if (!defined('DAY_IN_SECONDS')) {
+    define('DAY_IN_SECONDS', 60 * 60 * 24);
+}
+
+// Minimal WP function stubs in the global namespace, declared once at boot.
+if (!function_exists('wp_parse_url')) {
+    function wp_parse_url(string $url, int $component = -1)
+    {
+        $parsed = parse_url($url);
+        if ($parsed === false) {
+            return false;
+        }
+        if ($component === PHP_URL_HOST) {
+            return $parsed['host'] ?? '';
+        }
+        return $parsed;
+    }
+}
+if (!function_exists('url_to_postid')) {
+    function url_to_postid(string $url): int
+    {
+        if (preg_match('#/post-(\d+)(?:/|$|\?)#', $url, $m)) {
+            return (int) $m[1];
+        }
+        if (preg_match('#[?&]p=(\d+)#', $url, $m)) {
+            return (int) $m[1];
+        }
+        return 0;
+    }
+}

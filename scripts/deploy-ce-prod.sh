@@ -51,6 +51,20 @@ rsync -a \
 echo "==> Installing production composer dependencies (autoloader only)"
 (cd "$STAGE/$SLUG" && composer install --no-dev --optimize-autoloader --quiet --no-interaction)
 
+echo "==> PHP syntax check (every plugin .php file)"
+ERR=0
+while IFS= read -r f; do
+  if ! php -l "$f" > /dev/null 2>&1; then
+    php -l "$f"
+    ERR=1
+  fi
+done < <(find "$STAGE/$SLUG" -name "*.php" -not -path "*/vendor/composer/*")
+if [ $ERR -ne 0 ]; then
+    echo "FAIL: PHP syntax errors above. Aborting deploy."
+    exit 1
+fi
+echo "  all PHP files clean"
+
 echo "==> Rsync to $SSH_ALIAS:$REMOTE_PLUGIN_DIR"
 rsync -avz --delete \
   -e "ssh" \

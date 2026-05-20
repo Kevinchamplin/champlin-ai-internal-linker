@@ -25,13 +25,16 @@ final class IndexQueue
     public const HOOK = 'cil_index_post';
 
     private CosineCalculator $cosine;
+    private ContentExtractor $extractor;
 
     public function __construct(
         private ProviderFactory $provider_factory,
         private VectorStore $vector_store,
-        private ContentNormalizer $normalizer
+        private ContentNormalizer $normalizer,
+        ?ContentExtractor $extractor = null
     ) {
-        $this->cosine = new CosineCalculator();
+        $this->cosine    = new CosineCalculator();
+        $this->extractor = $extractor ?? new ContentExtractor();
     }
 
     /**
@@ -88,7 +91,7 @@ final class IndexQueue
         }
 
         $title      = (string) $post->post_title;
-        $content    = (string) $post->post_content;
+        $content    = $this->extractor->extract($post);
         $raw        = trim($title . "\n\n" . $content);
         $normalized = $this->normalizer->normalize($raw);
         if ($normalized === '') {

@@ -81,13 +81,35 @@ final class SettingsPage
         $max = isset($input['max_suggestions']) ? (int) $input['max_suggestions'] : $defaults['max_suggestions'];
         $max = max(1, min(50, $max));
 
+        $ignored_post_ids = $input['ignored_post_ids'] ?? [];
+        if (is_string($ignored_post_ids)) {
+            $ignored_post_ids = preg_split('/[\s,]+/', $ignored_post_ids) ?: [];
+        }
+        $ignored_post_ids = is_array($ignored_post_ids) ? $ignored_post_ids : [];
+        $ignored_post_ids = array_values(array_unique(array_filter(
+            array_map('intval', $ignored_post_ids),
+            static fn(int $id): bool => $id > 0
+        )));
+
+        $ignored_term_ids = $input['ignored_term_ids'] ?? [];
+        if (is_string($ignored_term_ids)) {
+            $ignored_term_ids = preg_split('/[\s,]+/', $ignored_term_ids) ?: [];
+        }
+        $ignored_term_ids = is_array($ignored_term_ids) ? $ignored_term_ids : [];
+        $ignored_term_ids = array_values(array_unique(array_filter(
+            array_map('intval', $ignored_term_ids),
+            static fn(int $id): bool => $id > 0
+        )));
+
         return [
-            'provider'        => $provider !== '' ? $provider : 'openai',
-            'model'           => $model !== '' ? $model : 'text-embedding-3-small',
-            'api_key'         => $api_key,
-            'threshold'       => $threshold,
-            'post_types'      => $post_types,
-            'max_suggestions' => $max,
+            'provider'         => $provider !== '' ? $provider : 'openai',
+            'model'            => $model !== '' ? $model : 'text-embedding-3-small',
+            'api_key'          => $api_key,
+            'threshold'        => $threshold,
+            'post_types'       => $post_types,
+            'max_suggestions'  => $max,
+            'ignored_post_ids' => $ignored_post_ids,
+            'ignored_term_ids' => $ignored_term_ids,
         ];
     }
 

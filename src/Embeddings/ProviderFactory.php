@@ -20,22 +20,24 @@ final class ProviderFactory
     public const OPTION_KEY = 'cil_settings';
 
     /**
-     * @return array{provider: string, model: string, api_key: string, threshold: float, post_types: string[], max_suggestions: int}
+     * @return array{provider: string, model: string, api_key: string, threshold: float, post_types: string[], max_suggestions: int, ignored_post_ids: int[], ignored_term_ids: int[]}
      */
     public static function defaults(): array
     {
         return [
-            'provider'        => 'openai',
-            'model'           => 'text-embedding-3-small',
-            'api_key'         => '',
-            'threshold'       => 0.75,
-            'post_types'      => ['post'],
-            'max_suggestions' => 5,
+            'provider'         => 'openai',
+            'model'            => 'text-embedding-3-small',
+            'api_key'          => '',
+            'threshold'        => 0.75,
+            'post_types'       => ['post'],
+            'max_suggestions'  => 5,
+            'ignored_post_ids' => [],
+            'ignored_term_ids' => [],
         ];
     }
 
     /**
-     * @return array{provider: string, model: string, api_key: string, threshold: float, post_types: string[], max_suggestions: int}
+     * @return array{provider: string, model: string, api_key: string, threshold: float, post_types: string[], max_suggestions: int, ignored_post_ids: int[], ignored_term_ids: int[]}
      */
     public static function settings(): array
     {

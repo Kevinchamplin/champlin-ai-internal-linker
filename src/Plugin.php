@@ -16,14 +16,20 @@ use Champlin\InternalLinker\Embeddings\ProviderFactory;
 use Champlin\InternalLinker\Engine\AnchorExtractor;
 use Champlin\InternalLinker\Engine\SuggestionEngine;
 use Champlin\InternalLinker\Indexing\BulkIndexer;
+use Champlin\InternalLinker\Indexing\ContentExtractor;
 use Champlin\InternalLinker\Indexing\ContentNormalizer;
 use Champlin\InternalLinker\Indexing\IndexQueue;
+use Champlin\InternalLinker\Integrations\TargetKeywordReader;
+use Champlin\InternalLinker\Reports\LinkGraphScanner;
+use Champlin\InternalLinker\Reports\OrphanReport;
 use Champlin\InternalLinker\REST\IndexController;
+use Champlin\InternalLinker\REST\ReportsController;
 use Champlin\InternalLinker\REST\SuggestionsController;
 use Champlin\InternalLinker\Similarity\CosineCalculator;
 use Champlin\InternalLinker\Storage\Schema;
 use Champlin\InternalLinker\Storage\SuggestionLog;
 use Champlin\InternalLinker\Storage\VectorStore;
+use Champlin\InternalLinker\Admin\ReportsPage;
 
 final class Plugin
 {
@@ -32,17 +38,23 @@ final class Plugin
     private VectorStore $vector_store;
     private SuggestionLog $suggestion_log;
     private ContentNormalizer $normalizer;
+    private ContentExtractor $content_extractor;
     private CosineCalculator $cosine;
     private ProviderFactory $provider_factory;
+    private TargetKeywordReader $keyword_reader;
+    private LinkGraphScanner $link_graph_scanner;
+    private OrphanReport $orphan_report;
     private SuggestionEngine $suggestion_engine;
     private AnchorExtractor $anchor_extractor;
     private IndexQueue $index_queue;
     private BulkIndexer $bulk_indexer;
     private SettingsPage $settings_page;
     private IndexerPage $indexer_page;
+    private ReportsPage $reports_page;
     private EditorAssets $editor_assets;
     private SuggestionsController $suggestions_controller;
     private IndexController $index_controller;
+    private ReportsController $reports_controller;
 
     public static function boot(): void
     {
@@ -80,36 +92,47 @@ final class Plugin
     {
         global $wpdb;
 
-        $this->vector_store      = new VectorStore($wpdb);
-        $this->suggestion_log    = new SuggestionLog($wpdb);
-        $this->normalizer        = new ContentNormalizer();
-        $this->cosine            = new CosineCalculator();
-        $this->provider_factory  = new ProviderFactory();
-        $this->anchor_extractor  = new AnchorExtractor(
+        $this->vector_store        = new VectorStore($wpdb);
+        $this->suggestion_log      = new SuggestionLog($wpdb);
+        $this->normalizer          = new ContentNormalizer();
+        $this->content_extractor   = new ContentExtractor();
+        $this->cosine              = new CosineCalculator();
+        $this->provider_factory    = new ProviderFactory();
+        $this->keyword_reader      = new TargetKeywordReader();
+        $this->link_graph_scanner  = new LinkGraphScanner();
+        $this->orphan_report       = new OrphanReport($this->link_graph_scanner);
+        $this->anchor_extractor    = new AnchorExtractor(
             $this->provider_factory,
             $this->cosine,
             $this->normalizer,
             $this->vector_store
         );
-        $this->suggestion_engine = new SuggestionEngine(
+        $this->suggestion_engine   = new SuggestionEngine(
             $this->vector_store,
             $this->cosine,
-            $this->anchor_extractor
+            $this->anchor_extractor,
+            $this->keyword_reader
         );
-        $this->index_queue       = new IndexQueue(
+        $this->index_queue         = new IndexQueue(
             $this->provider_factory,
             $this->vector_store,
-            $this->normalizer
+            $this->normalizer,
+            $this->content_extractor
         );
-        $this->bulk_indexer      = new BulkIndexer($this->index_queue);
-        $this->settings_page     = new SettingsPage();
-        $this->indexer_page      = new IndexerPage($this->bulk_indexer);
-        $this->editor_assets     = new EditorAssets();
+        $this->bulk_indexer        = new BulkIndexer($this->index_queue);
+        $this->settings_page       = new SettingsPage();
+        $this->indexer_page        = new IndexerPage($this->bulk_indexer);
+        $this->reports_page        = new ReportsPage($this->orphan_report);
+        $this->editor_assets       = new EditorAssets();
         $this->suggestions_controller = new SuggestionsController(
             $this->suggestion_engine,
             $this->suggestion_log
         );
-        $this->index_controller  = new IndexController($this->bulk_indexer);
+        $this->index_controller    = new IndexController($this->bulk_indexer);
+        $this->reports_controller  = new ReportsController(
+            $this->orphan_report,
+            $this->link_graph_scanner
+        );
     }
 
     private function register(): void
@@ -126,6 +149,7 @@ final class Plugin
         // Admin UI.
         add_action('admin_menu', [$this->settings_page, 'register']);
         add_action('admin_menu', [$this->indexer_page, 'register']);
+        add_action('admin_menu', [$this->reports_page, 'register']);
         add_action('admin_init', [$this->settings_page, 'register_settings']);
 
         // Block editor sidebar.
@@ -134,6 +158,11 @@ final class Plugin
         // REST routes.
         add_action('rest_api_init', [$this->suggestions_controller, 'register_routes']);
         add_action('rest_api_init', [$this->index_controller, 'register_routes']);
+        add_action('rest_api_init', [$this->reports_controller, 'register_routes']);
+
+        // Invalidate the link graph cache whenever content is saved or deleted.
+        add_action('save_post', [$this->link_graph_scanner, 'invalidate'], 25, 0);
+        add_action('before_delete_post', [$this->link_graph_scanner, 'invalidate'], 25, 0);
 
         // i18n.
         add_action('init', [$this, 'load_textdomain']);

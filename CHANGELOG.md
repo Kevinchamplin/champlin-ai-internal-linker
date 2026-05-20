@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-05-20, sprint-1-free-tier-parity) [2.5h]
+- **Orphan Pages report** — new Reports admin sub-page lists every published post with zero internal links pointing to it. Backed by `LinkGraphScanner` (regex parse + `url_to_postid` resolution) and `OrphanReport`. 6h transient cache, auto-invalidated on `save_post` / `before_delete_post`. Manual "Re-scan now" button + nonce-protected.
+- **Ignore lists** — `ignored_post_ids` (CSV of post IDs) and `ignored_term_ids` (CSV of category term IDs, includes children) added to the Settings screen. Merged into `SuggestionEngine` exclusion set at suggestion time.
+- **Target keyword reader** — `TargetKeywordReader` reads focus keyword from Yoast SEO (`_yoast_wpseo_focuskw`), Rank Math (`rank_math_focus_keyword`), All in One SEO (`_aioseo_keyphrases` JSON or `_aioseo_keywords` legacy), and SEOPress (`_seopress_analysis_target_kw`). First non-empty wins. Exposed in REST `/cil/v1/suggestions` as `target_keyword` + `target_keyword_source`.
+- **Page-builder content extraction** — `ContentExtractor` runs `do_shortcode()` before normalization so Divi (`[et_pb_*]`), WPBakery (`[vc_*]`), and any other shortcode-based content is included in the embedding. Sets up `$post` global / `setup_postdata()` then restores; falls back to raw content on Throwable or if expansion shrinks content >70%.
+- **REST routes** — `GET /cil/v1/reports/orphans` and `POST /cil/v1/reports/rescan`, both gated on `require_admin` (`manage_options` + nonce).
+- **Tests** — `TargetKeywordReaderTest` (6 methods) + `LinkGraphScannerTest` (5 methods). New WP function stubs (`wp_parse_url`, `url_to_postid`) declared once in `tests/bootstrap.php`. **Total: 29 tests / 49 assertions, all green.**
+- **Version**: 1.0.1 → 1.1.0 (MINOR — new features, no breaking changes).
+
 ### Fixed (2026-05-20, anchor-extractor-batching) [1h]
 - AnchorExtractor was making ~100 sequential OpenAI calls per suggestion fetch (one `embed()` per source sentence per target). Dogfood on crm.champlinenterprises.com with 82 posts measured 104,970 ms for one call.
 - Refactored: now batches all source sentences into a single `embed_batch()` request, and uses the target post's already-stored full-content vector from VectorStore for ranking instead of re-embedding its title+excerpt.

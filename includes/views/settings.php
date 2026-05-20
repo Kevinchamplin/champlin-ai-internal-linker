@@ -110,6 +110,40 @@ if (!defined('ABSPATH')) {
             </tr>
 
             <tr>
+                <th scope="row">
+                    <label for="cil-ignored-posts"><?php esc_html_e('Ignored post IDs', 'champlin-internal-linker'); ?></label>
+                </th>
+                <td>
+                    <input
+                        type="text"
+                        id="cil-ignored-posts"
+                        name="cil_settings[ignored_post_ids]"
+                        value="<?php echo esc_attr(implode(', ', array_map('intval', $settings['ignored_post_ids']))); ?>"
+                        class="regular-text"
+                        placeholder="e.g. 42, 188, 902"
+                    />
+                    <p class="description"><?php esc_html_e('Comma-separated post IDs to exclude from suggestions. Useful for landing pages, legal pages, or anything you never want auto-suggested.', 'champlin-internal-linker'); ?></p>
+                </td>
+            </tr>
+
+            <tr>
+                <th scope="row">
+                    <label for="cil-ignored-terms"><?php esc_html_e('Ignored category IDs', 'champlin-internal-linker'); ?></label>
+                </th>
+                <td>
+                    <input
+                        type="text"
+                        id="cil-ignored-terms"
+                        name="cil_settings[ignored_term_ids]"
+                        value="<?php echo esc_attr(implode(', ', array_map('intval', $settings['ignored_term_ids']))); ?>"
+                        class="regular-text"
+                        placeholder="e.g. 7, 19"
+                    />
+                    <p class="description"><?php esc_html_e('Comma-separated category term IDs. Every published post in those categories (and their children) is excluded from suggestions.', 'champlin-internal-linker'); ?></p>
+                </td>
+            </tr>
+
+            <tr>
                 <th scope="row"><?php esc_html_e('Provider', 'champlin-internal-linker'); ?></th>
                 <td>
                     <input type="hidden" name="cil_settings[provider]" value="openai" />
