@@ -111,6 +111,20 @@ upgrade path.
 
 ## Settings hooks
 
+### `cil_settings_render_extra`  (action)
+
+Fires inside the Settings page form, between the *Content scope* and
+*Exclusions* sections. Implementations render a complete `<section class="cil-card">`
+with their own fields. Inputs persisted via `cil_settings_sanitized`.
+
+**Signature**
+```php
+do_action('cil_settings_render_extra', array $settings)
+```
+
+**Use for:** Pro's License panel, third-party add-ons that need form fields
+inside the main Settings page rather than a separate sub-menu.
+
 ### `cil_settings_sanitized`  (filter)
 
 Fires at the end of `SettingsPage::sanitize()`, after Free's own fields are
@@ -148,4 +162,5 @@ activate a mismatched pair.
 | `cil_rank_results` | `src/Engine/SuggestionEngine.php` | after `cosine->rank()` |
 | `cil_suggestion_row` | `src/Engine/SuggestionEngine.php` | inside the result loop |
 | `cil_provider` | `src/Embeddings/ProviderFactory.php` | top of `create()` |
+| `cil_settings_render_extra` | `includes/views/settings.php` | between Content Scope and Exclusions sections |
 | `cil_settings_sanitized` | `src/Admin/SettingsPage.php` | end of `sanitize()` |

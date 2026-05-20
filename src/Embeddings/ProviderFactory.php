@@ -28,7 +28,11 @@ final class ProviderFactory
             'provider'         => 'openai',
             'model'            => 'text-embedding-3-small',
             'api_key'          => '',
-            'threshold'        => 0.75,
+            // 0.55 is the empirical sweet spot for OpenAI text-embedding-3-small
+            // on real WordPress content: identical→1.0, very related→0.65–0.80,
+            // related→0.50–0.65, tangential→0.30–0.50, unrelated→<0.30.
+            // 0.75 — our v1.0 default — was too strict; real content rarely crosses it.
+            'threshold'        => 0.55,
             'post_types'       => ['post'],
             'max_suggestions'  => 5,
             'ignored_post_ids' => [],

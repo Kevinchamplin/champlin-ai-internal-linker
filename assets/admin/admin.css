@@ -2,17 +2,587 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =============================================================
+   Champlin AI Internal Linker — Admin UI
+   Brand: teal #5eead4 + purple-blue #60a5fa accent
+   Tailwind preflight is OFF — we cannot rely on default resets.
+   Every component class is self-sufficient.
+   ============================================================= */
+
+@layer base {
+  /* Reduce flash on first paint */
+  .cil-app * { box-sizing: border-box; }
+  .cil-app { color: #0f172a; }
+}
+
 @layer components {
-    .cil-wrap {
-        @apply text-slate-800;
-    }
-    .cil-card {
-        @apply bg-white border border-slate-200 rounded-lg p-6 shadow-sm mt-6 max-w-3xl;
-    }
-    .cil-footer-credit {
-        @apply text-xs text-slate-500 mt-8;
-    }
-    .cil-footer-credit a {
-        @apply text-slate-700 underline;
-    }
+  /* ---------- Layout primitives ---------- */
+  .cil-app {
+    @apply max-w-6xl mt-3 mb-6;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  .cil-app-header {
+    @apply flex flex-wrap items-start justify-between gap-4 mb-6 pb-5 border-b border-slate-200;
+  }
+  .cil-app-title h1 {
+    @apply text-2xl font-semibold text-slate-900 m-0 leading-tight;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .cil-app-eyebrow {
+    @apply text-xs uppercase tracking-widest text-teal-600 font-medium mb-1.5 inline-flex items-center gap-1.5;
+  }
+  .cil-app-subtitle {
+    @apply text-sm text-slate-500 mt-1.5 max-w-2xl m-0;
+    line-height: 1.55;
+  }
+  .cil-app-actions {
+    @apply flex items-center gap-2 flex-wrap;
+  }
+  .cil-app-footer {
+    @apply text-xs text-slate-400 mt-10 pt-5 border-t border-slate-200 flex items-center justify-between gap-2 flex-wrap;
+  }
+  .cil-app-footer a {
+    @apply text-slate-600 no-underline;
+    border-bottom: 1px solid rgba(94,234,212,0.4);
+  }
+  .cil-app-footer a:hover { @apply text-teal-600; }
+  .cil-version-chip {
+    @apply inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-500;
+  }
+
+  /* ---------- Cards ---------- */
+  .cil-grid {
+    @apply grid gap-5;
+  }
+  @media (min-width: 1024px) {
+    .cil-grid-2 { grid-template-columns: 1fr 1fr; }
+    .cil-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  .cil-card {
+    @apply bg-white border border-slate-200 rounded-xl overflow-hidden;
+    box-shadow: 0 1px 2px rgba(15,23,42,0.04);
+  }
+  .cil-card + .cil-card { margin-top: 1.25rem; }
+  .cil-card-header {
+    @apply px-6 py-5 border-b border-slate-100 flex items-start justify-between gap-4;
+  }
+  .cil-card-header h2 {
+    @apply text-base font-semibold text-slate-900 m-0 leading-tight;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .cil-card-header .cil-help {
+    @apply text-xs text-slate-500 mt-1 m-0 max-w-prose;
+    line-height: 1.55;
+  }
+  .cil-card-body {
+    @apply px-6 py-5;
+  }
+  .cil-card-body--tight { @apply py-3; }
+  .cil-card-body--flush { padding: 0; }
+  .cil-card-footer {
+    @apply px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-3 flex-wrap;
+  }
+  .cil-card--accent {
+    border-color: rgba(94,234,212,0.45);
+    background: linear-gradient(180deg, rgba(94,234,212,0.05), rgba(255,255,255,1) 60%);
+  }
+
+  /* Card with thin gradient stripe on the left (used to denote premium / status sections) */
+  .cil-card--striped { position: relative; }
+  .cil-card--striped::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 3px; background: linear-gradient(180deg, #5eead4, #60a5fa);
+  }
+
+  /* ---------- Status banners ---------- */
+  .cil-banner {
+    @apply px-5 py-4 rounded-xl border flex items-start gap-3 mb-5;
+  }
+  .cil-banner svg { @apply flex-shrink-0 mt-0.5; }
+  .cil-banner p { @apply text-sm m-0; line-height: 1.55; }
+  .cil-banner-title { @apply font-semibold mb-1 block text-[0.95rem]; }
+  .cil-banner-success {
+    @apply bg-emerald-50 border-emerald-200 text-emerald-900;
+  }
+  .cil-banner-success svg { @apply text-emerald-500; }
+  .cil-banner-warning {
+    @apply bg-amber-50 border-amber-200 text-amber-900;
+  }
+  .cil-banner-warning svg { @apply text-amber-500; }
+  .cil-banner-error {
+    @apply bg-rose-50 border-rose-200 text-rose-900;
+  }
+  .cil-banner-error svg { @apply text-rose-500; }
+  .cil-banner-info {
+    @apply bg-sky-50 border-sky-200 text-sky-900;
+  }
+  .cil-banner-info svg { @apply text-sky-500; }
+  .cil-banner-premium {
+    background: linear-gradient(135deg, rgba(94,234,212,0.10), rgba(96,165,250,0.07));
+    border: 1px solid rgba(94,234,212,0.40);
+    color: #0f172a;
+  }
+  .cil-banner-premium svg { color: #14b8a6; }
+  .cil-banner-actions { @apply flex items-center gap-2 ml-auto flex-shrink-0; }
+  /* Adds explicit top spacing for premium banners that follow a card directly. */
+  .cil-banner--spaced { margin-top: 1.5rem; }
+
+  /* ---------- Form fields ---------- */
+  .cil-field {
+    @apply mb-5;
+  }
+  .cil-field:last-child { margin-bottom: 0; }
+  .cil-field-label {
+    @apply flex items-center gap-1.5 mb-1.5 text-sm font-medium text-slate-800;
+  }
+  .cil-field-required {
+    @apply text-rose-500 text-xs;
+  }
+  .cil-field-hint {
+    @apply text-xs text-slate-500 mt-1.5 m-0;
+    line-height: 1.55;
+  }
+  .cil-field-hint a { @apply text-teal-700; }
+  .cil-field-hint code {
+    @apply px-1 py-px rounded bg-slate-100 text-slate-700 text-[0.72rem];
+  }
+
+  /* Inputs */
+  .cil-input,
+  .cil-textarea,
+  .cil-select {
+    @apply block w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm text-slate-900;
+    transition: border-color .15s ease, box-shadow .15s ease;
+    box-shadow: 0 1px 0 rgba(15,23,42,0.04);
+    font-family: inherit;
+    max-width: 38rem;
+  }
+  .cil-input--mono { font-family: ui-monospace, "JetBrains Mono", "Fira Code", monospace; }
+  .cil-input--narrow { max-width: 10rem; }
+  .cil-input:focus,
+  .cil-textarea:focus,
+  .cil-select:focus {
+    @apply outline-none border-teal-500;
+    box-shadow: 0 0 0 3px rgba(94,234,212,0.25);
+  }
+  .cil-input::placeholder,
+  .cil-textarea::placeholder {
+    @apply text-slate-400;
+  }
+
+  /* Input with adornment (icon or status) */
+  .cil-input-group { @apply relative; max-width: 38rem; }
+  .cil-input-group .cil-input { padding-right: 2.5rem; }
+  .cil-input-suffix {
+    @apply absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium pointer-events-none;
+  }
+  .cil-input-suffix-valid { @apply text-emerald-600 inline-flex items-center gap-1; }
+  .cil-input-suffix-empty { @apply text-amber-600 inline-flex items-center gap-1; }
+
+  /* Slider */
+  .cil-slider-wrap { @apply flex items-center gap-3 max-w-md; }
+  .cil-slider {
+    @apply flex-1 h-2 rounded-full appearance-none;
+    background: linear-gradient(to right, #60a5fa 0%, #5eead4 100%);
+    cursor: pointer;
+  }
+  .cil-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid #14b8a6;
+    box-shadow: 0 1px 3px rgba(15,23,42,0.2);
+    cursor: pointer;
+  }
+  .cil-slider::-moz-range-thumb {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid #14b8a6;
+    cursor: pointer;
+  }
+  .cil-slider-value {
+    @apply inline-flex items-center justify-center font-mono text-sm font-semibold text-slate-800 bg-slate-100 rounded-md px-2 py-1 min-w-[3.5rem] text-center tabular-nums;
+  }
+  .cil-slider-scale {
+    @apply flex justify-between text-[11px] text-slate-400 mt-2 max-w-md;
+  }
+
+  /* Checkbox list (post types) */
+  .cil-checklist {
+    @apply grid gap-2;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  }
+  .cil-checklist label {
+    @apply flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg cursor-pointer text-sm bg-white;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .cil-checklist label:hover { @apply border-teal-300 bg-teal-50/40; }
+  .cil-checklist input[type="checkbox"] {
+    @apply h-4 w-4 rounded border-slate-300;
+    accent-color: #14b8a6;
+  }
+  .cil-checklist input[type="checkbox"]:checked + .cil-checklist-text {
+    @apply text-teal-900 font-medium;
+  }
+  .cil-checklist-text {
+    @apply inline-flex items-center gap-1.5 text-slate-700;
+  }
+  .cil-checklist-text code {
+    @apply text-[0.7rem] px-1.5 py-px rounded bg-slate-100 text-slate-500;
+    font-family: ui-monospace, monospace;
+  }
+
+  /* Tooltip — pure CSS hover/focus reveal */
+  .cil-tooltip {
+    @apply inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-slate-500 text-[10px] font-semibold cursor-help relative;
+    line-height: 1;
+  }
+  .cil-tooltip:hover, .cil-tooltip:focus { @apply bg-teal-100 text-teal-700; outline: none; }
+  .cil-tooltip-body {
+    @apply hidden absolute z-20 bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 text-xs font-normal text-white bg-slate-900 rounded-lg whitespace-normal pointer-events-none;
+    width: 240px;
+    box-shadow: 0 4px 12px rgba(15,23,42,0.18);
+    line-height: 1.5;
+  }
+  .cil-tooltip-body::after {
+    content: ""; position: absolute; top: 100%; left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #0f172a;
+  }
+  .cil-tooltip:hover .cil-tooltip-body,
+  .cil-tooltip:focus .cil-tooltip-body { @apply block; }
+
+  /* ---------- Buttons ---------- */
+  .cil-btn {
+    @apply inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium cursor-pointer border;
+    transition: all .15s ease;
+    text-decoration: none;
+    line-height: 1.2;
+    min-height: 36px;
+  }
+  .cil-btn:focus-visible {
+    @apply outline-none;
+    box-shadow: 0 0 0 3px rgba(94,234,212,0.4);
+  }
+  .cil-btn-primary {
+    background: linear-gradient(180deg, #2dd4bf, #14b8a6);
+    color: white;
+    border-color: #0d9488;
+    box-shadow: 0 1px 2px rgba(15,23,42,0.08);
+  }
+  .cil-btn-primary:hover {
+    background: linear-gradient(180deg, #5eead4, #2dd4bf);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(20,184,166,0.25);
+  }
+  .cil-btn-primary:disabled, .cil-btn-primary[disabled] {
+    @apply opacity-60 cursor-not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  .cil-btn-ghost {
+    @apply bg-white text-slate-700 border-slate-200;
+  }
+  .cil-btn-ghost:hover {
+    @apply border-teal-400 text-teal-700 bg-teal-50/40;
+  }
+  .cil-btn-link {
+    background: transparent; border-color: transparent;
+    @apply text-teal-700 px-1;
+  }
+  .cil-btn-link:hover { @apply text-teal-900 underline; }
+  .cil-btn-sm {
+    @apply text-xs px-2.5 py-1;
+    min-height: 28px;
+  }
+  .cil-btn-lg {
+    @apply text-base px-5 py-3 rounded-xl;
+    min-height: 44px;
+  }
+
+  /* ---------- Status pills ---------- */
+  .cil-pill {
+    @apply inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium uppercase tracking-wider;
+    line-height: 1.4;
+  }
+  .cil-pill-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+  }
+  .cil-pill-success {
+    @apply bg-emerald-50 text-emerald-700;
+    border: 1px solid rgba(16,185,129,0.25);
+  }
+  .cil-pill-success .cil-pill-dot { background: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.15); }
+  .cil-pill-warning {
+    @apply bg-amber-50 text-amber-700;
+    border: 1px solid rgba(245,158,11,0.25);
+  }
+  .cil-pill-warning .cil-pill-dot { background: #f59e0b; }
+  .cil-pill-idle {
+    @apply bg-slate-100 text-slate-600;
+    border: 1px solid rgba(100,116,139,0.18);
+  }
+  .cil-pill-idle .cil-pill-dot { background: #94a3b8; }
+  .cil-pill-running {
+    @apply bg-sky-50 text-sky-700;
+    border: 1px solid rgba(14,165,233,0.25);
+  }
+  .cil-pill-running .cil-pill-dot {
+    background: #0ea5e9;
+    animation: cil-pulse 1.4s ease-in-out infinite;
+  }
+  .cil-pill-premium {
+    background: linear-gradient(135deg, rgba(94,234,212,0.18), rgba(96,165,250,0.12));
+    color: #0e7490;
+    border: 1px solid rgba(94,234,212,0.45);
+  }
+  @keyframes cil-pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(14,165,233,0.5); }
+    50%      { opacity: 0.8; box-shadow: 0 0 0 4px rgba(14,165,233,0); }
+  }
+
+  /* ---------- Stat cards ---------- */
+  .cil-stat {
+    @apply px-5 py-4 bg-white border border-slate-200 rounded-xl flex flex-col gap-1;
+  }
+  .cil-stat-label {
+    @apply text-[11px] uppercase tracking-widest text-slate-500 font-medium;
+  }
+  .cil-stat-value {
+    @apply text-3xl font-semibold text-slate-900 tabular-nums leading-none;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .cil-stat-meta {
+    @apply text-xs text-slate-500;
+  }
+  .cil-stat--accent .cil-stat-value {
+    background: linear-gradient(135deg, #14b8a6, #60a5fa);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* ---------- Progress ---------- */
+  .cil-progress {
+    @apply w-full h-3 bg-slate-100 rounded-full overflow-hidden relative;
+  }
+  .cil-progress-bar {
+    @apply h-full rounded-full transition-all duration-500;
+    background: linear-gradient(90deg, #14b8a6, #5eead4);
+    box-shadow: 0 0 12px rgba(94,234,212,0.4);
+  }
+  .cil-progress-bar--indeterminate {
+    width: 30% !important;
+    animation: cil-indeterminate 1.6s ease-in-out infinite;
+  }
+  @keyframes cil-indeterminate {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(350%); }
+  }
+
+  /* ---------- Tables ---------- */
+  .cil-table-wrap {
+    @apply overflow-x-auto -mx-px;
+  }
+  .cil-table {
+    @apply w-full border-collapse text-sm;
+    table-layout: auto;
+  }
+  .cil-table thead th {
+    @apply text-left text-[11px] uppercase tracking-widest text-slate-500 font-medium px-5 py-3 bg-slate-50 border-b border-slate-200 whitespace-nowrap;
+  }
+  .cil-table tbody td {
+    @apply px-5 py-3 border-b border-slate-100 text-slate-700;
+    vertical-align: middle;
+  }
+  .cil-table tbody tr {
+    @apply transition-colors;
+  }
+  .cil-table tbody tr:hover { @apply bg-slate-50; }
+  .cil-table tbody tr:last-child td { border-bottom: 0; }
+  .cil-table-cell-strong {
+    @apply text-slate-900 font-medium;
+  }
+  .cil-table-cell-link a {
+    @apply text-slate-900 font-medium no-underline;
+  }
+  .cil-table-cell-link a:hover { @apply text-teal-700 underline; }
+  .cil-table-pt-chip {
+    @apply inline-block px-2 py-0.5 rounded text-[11px] font-mono bg-slate-100 text-slate-600;
+  }
+  .cil-table-modified {
+    @apply text-xs text-slate-500 tabular-nums whitespace-nowrap;
+  }
+  .cil-table-actions {
+    @apply flex items-center justify-end gap-2;
+  }
+
+  /* ---------- Orphan row (Reports — expandable workflow) ---------- */
+  .cil-orphan-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .cil-orphan-row {
+    border-bottom: 1px solid #f1f5f9;
+    margin: 0;
+  }
+  .cil-orphan-row:last-child { border-bottom: 0; }
+  .cil-orphan-row details summary {
+    @apply px-5 py-4 cursor-pointer select-none;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    list-style: none;
+    transition: background .15s ease;
+  }
+  .cil-orphan-row details summary::-webkit-details-marker { display: none; }
+  .cil-orphan-row details summary::marker { display: none; }
+  .cil-orphan-row details summary:hover { @apply bg-slate-50; }
+  .cil-orphan-row details[open] summary { @apply bg-teal-50/40 border-b border-teal-100; }
+  .cil-orphan-row details[open] .cil-orphan-chevron svg { transform: rotate(90deg); }
+  .cil-orphan-chevron svg {
+    @apply text-slate-400;
+    transition: transform .15s ease;
+  }
+  .cil-orphan-row details[open] .cil-orphan-chevron svg { @apply text-teal-600; }
+
+  .cil-orphan-summary-main {
+    @apply flex-1 min-w-0;
+    display: flex; flex-direction: column; gap: 0.3rem;
+  }
+  .cil-orphan-title {
+    @apply flex items-center gap-2;
+  }
+  .cil-orphan-title strong {
+    @apply text-slate-900 font-medium text-[0.95rem];
+  }
+  .cil-orphan-meta {
+    @apply flex items-center gap-2 flex-wrap text-xs text-slate-500;
+    padding-left: 1.4rem;
+  }
+  .cil-orphan-modified {
+    @apply tabular-nums;
+  }
+  .cil-orphan-summary-actions { @apply flex-shrink-0; }
+
+  .cil-orphan-detail {
+    @apply px-5 py-5 bg-slate-50/60;
+  }
+
+  .cil-orphan-howto {
+    @apply text-sm text-slate-700 mb-3.5;
+    line-height: 1.55;
+  }
+  .cil-orphan-howto strong {
+    @apply text-slate-900 mr-1;
+  }
+  .cil-orphan-howto a {
+    @apply text-teal-700;
+  }
+  .cil-orphan-howto--warn {
+    @apply bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5 text-amber-900;
+  }
+  .cil-orphan-howto--warn strong { @apply text-amber-900; }
+  .cil-orphan-howto--warn a { @apply text-amber-800 underline; }
+
+  .cil-candidate-list {
+    list-style: none; padding: 0; margin: 0;
+    display: grid; gap: 0.5rem;
+  }
+  .cil-candidate {
+    @apply bg-white border border-slate-200 rounded-lg px-4 py-3;
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .cil-candidate:hover {
+    border-color: rgba(94,234,212,0.45);
+    box-shadow: 0 1px 4px rgba(20,184,166,0.10);
+  }
+  .cil-candidate-main {
+    @apply flex-1 min-w-0;
+    display: flex; flex-direction: column; gap: 0.2rem;
+  }
+  .cil-candidate-title {
+    @apply text-slate-900 font-medium text-sm flex items-center gap-1.5 no-underline;
+  }
+  .cil-candidate-title:hover { @apply text-teal-700; }
+  .cil-candidate-title svg { @apply text-slate-400; }
+  .cil-candidate-meta {
+    @apply text-xs text-slate-500;
+  }
+  .cil-candidate-score {
+    @apply inline-flex items-center px-1.5 py-px rounded text-[10px] font-medium tabular-nums;
+    background: rgba(94,234,212,0.15);
+    color: #0e7490;
+  }
+
+  .cil-orphan-detail-footer {
+    @apply flex items-center gap-2 mt-3.5 pt-3 border-t border-slate-200 flex-wrap;
+  }
+
+  /* ---------- Empty state ---------- */
+  .cil-empty {
+    @apply text-center py-12 px-6;
+  }
+  .cil-empty-icon {
+    @apply mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-4;
+    background: linear-gradient(135deg, rgba(94,234,212,0.15), rgba(96,165,250,0.10));
+    color: #0e7490;
+  }
+  .cil-empty h3 {
+    @apply text-base font-semibold text-slate-900 m-0 mb-2;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .cil-empty p {
+    @apply text-sm text-slate-500 max-w-md mx-auto m-0;
+    line-height: 1.55;
+  }
+
+  /* ---------- Premium accent bar ---------- */
+  .cil-premium-bar {
+    background: linear-gradient(135deg, rgba(94,234,212,0.08), rgba(96,165,250,0.05));
+    border: 1px solid rgba(94,234,212,0.30);
+    @apply rounded-xl px-5 py-4 mt-5 flex flex-wrap items-center gap-4;
+  }
+  .cil-premium-bar-icon {
+    @apply flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center;
+    background: linear-gradient(135deg, #2dd4bf, #60a5fa);
+    color: white;
+  }
+  .cil-premium-bar-body { @apply flex-1 min-w-[16rem]; }
+  .cil-premium-bar-body h4 {
+    @apply text-sm font-semibold text-slate-900 m-0 mb-0.5;
+  }
+  .cil-premium-bar-body p {
+    @apply text-xs text-slate-600 m-0;
+    line-height: 1.5;
+  }
+  .cil-premium-bar-actions { @apply flex items-center gap-2 ml-auto flex-wrap; }
+
+  /* ---------- Tip / callout (smaller than banner) ---------- */
+  .cil-tip {
+    @apply flex items-start gap-2 text-xs text-slate-600 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200;
+    line-height: 1.55;
+  }
+  .cil-tip svg { @apply flex-shrink-0 text-slate-400 mt-0.5; }
+
+  /* ---------- WP admin overrides (kept narrow & explicit) ---------- */
+  /* Hide WP's default .wrap H1 spacing on our pages — we control the header */
+  .cil-wrap h1.wp-heading-inline { display: none; }
+  /* Ensure WP screen-meta + notices float above our app cleanly */
+  .cil-wrap { @apply mt-1; }
+
+  /* Save area row */
+  .cil-savebar {
+    @apply sticky bottom-0 -mx-6 -mb-5 mt-2 px-6 py-3 bg-white/95 backdrop-blur border-t border-slate-200 flex items-center justify-between gap-3 z-10;
+  }
+  .cil-savebar-status { @apply text-xs text-slate-500; }
+}
+
+@layer utilities {
+  .cil-text-balance { text-wrap: balance; }
+  .cil-mono { font-family: ui-monospace, "JetBrains Mono", "Fira Code", monospace; }
 }

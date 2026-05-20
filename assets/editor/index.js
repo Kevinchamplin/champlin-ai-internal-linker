@@ -10,17 +10,68 @@ import { registerPlugin } from '@wordpress/plugins';
 import { PluginSidebar, PluginSidebarMoreMenuItem } from '@wordpress/edit-post';
 import { PanelBody, Button, Spinner, RangeControl, Notice } from '@wordpress/components';
 import { useState, useEffect, useCallback, createElement, Fragment } from '@wordpress/element';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch, dispatch as wpDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
 
 const PLUGIN_NAME = 'champlin-internal-linker';
+const SIDEBAR_NAME = 'cil-sidebar';
 
-const cfg = window.cilEditor || {
-    nonce: '',
-    restNamespace: 'cil/v1',
-    threshold: 0.75,
-    maxSuggestions: 5,
+/**
+ * If the editor URL carries `?cil_open=1`, auto-open the sidebar once the
+ * editor is ready. This is what fixes the orphan-report workflow — the
+ * candidate "Open in editor" buttons append that param so users land here
+ * with the sidebar already open instead of hunting in the kebab menu.
+ */
+function maybeAutoOpenSidebar() {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('cil_open') !== '1') return;
+        if (window.__cilSidebarAutoOpened) return;
+        const tryOpen = () => {
+            const editPost = wpDispatch('core/edit-post');
+            if (editPost && typeof editPost.openGeneralSidebar === 'function') {
+                editPost.openGeneralSidebar(`${PLUGIN_NAME}/${SIDEBAR_NAME}`);
+                window.__cilSidebarAutoOpened = true;
+                return true;
+            }
+            return false;
+        };
+        if (!tryOpen()) {
+            // wp.data may not be wired up at script-load time on some themes.
+            const interval = setInterval(() => {
+                if (tryOpen()) clearInterval(interval);
+            }, 200);
+            setTimeout(() => clearInterval(interval), 5000);
+        }
+    } catch (_) { /* silent */ }
+}
+maybeAutoOpenSidebar();
+
+/**
+ * Editor config injected by EditorAssets::enqueue() via wp_localize_script.
+ * We defensively coerce every numeric to a real Number — wp_localize_script
+ * can occasionally hand back stringified floats depending on WP version and
+ * sandbox, and a string value passed to RangeControl renders blank.
+ */
+const rawCfg = window.cilEditor || {};
+const DEFAULT_THRESHOLD = 0.55;   // calibrated for OpenAI text-embedding-3-small
+const DEFAULT_MAX_SUGGESTIONS = 5;
+
+function coerceFloat(value, fallback) {
+    const n = parseFloat(value);
+    return Number.isFinite(n) ? n : fallback;
+}
+function coerceInt(value, fallback) {
+    const n = parseInt(value, 10);
+    return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
+const cfg = {
+    nonce:          typeof rawCfg.nonce === 'string'         ? rawCfg.nonce         : '',
+    restNamespace:  typeof rawCfg.restNamespace === 'string' ? rawCfg.restNamespace : 'cil/v1',
+    threshold:      coerceFloat(rawCfg.threshold,      DEFAULT_THRESHOLD),
+    maxSuggestions: coerceInt(rawCfg.maxSuggestions,   DEFAULT_MAX_SUGGESTIONS),
 };
 
 apiFetch.use(apiFetch.createNonceMiddleware(cfg.nonce));
@@ -36,14 +87,20 @@ function InternalLinkerSidebar() {
     const [suggestions, setSuggestions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [threshold, setThreshold] = useState(cfg.threshold);
+    const [threshold, setThresholdRaw] = useState(cfg.threshold);
+
+    // Always store the threshold as a real Number, defensively.
+    const setThreshold = useCallback((v) => {
+        setThresholdRaw(coerceFloat(v, cfg.threshold));
+    }, []);
 
     const fetchSuggestions = useCallback(() => {
         if (!postId) return;
         setLoading(true);
         setError(null);
+        const t = coerceFloat(threshold, cfg.threshold).toFixed(2);
         apiFetch({
-            path: `/${cfg.restNamespace}/suggestions/${postId}?limit=${cfg.maxSuggestions}&threshold=${threshold}`,
+            path: `/${cfg.restNamespace}/suggestions/${postId}?limit=${cfg.maxSuggestions}&threshold=${t}`,
         })
             .then((rows) => {
                 setSuggestions(Array.isArray(rows) ? rows : []);
@@ -87,12 +144,22 @@ function InternalLinkerSidebar() {
             createElement(PanelBody, { title: __('Settings', PLUGIN_NAME), initialOpen: false },
                 createElement(RangeControl, {
                     label: __('Similarity threshold', PLUGIN_NAME),
-                    value: threshold,
-                    onChange: (v) => setThreshold(v),
+                    value: coerceFloat(threshold, cfg.threshold),
+                    onChange: setThreshold,
                     min: 0,
                     max: 1,
                     step: 0.05,
-                })
+                    help: sprintf(
+                        __('Saved default: %s (Settings → AI Linker). Adjustments here apply for this editor session only.', PLUGIN_NAME),
+                        cfg.threshold.toFixed(2)
+                    ),
+                }),
+                createElement(Button, {
+                    variant: 'link',
+                    onClick: () => { setThreshold(cfg.threshold); setTimeout(fetchSuggestions, 50); },
+                    style: { padding: 0, marginTop: '0.4rem', fontSize: '0.78rem' },
+                    disabled: Math.abs(threshold - cfg.threshold) < 0.001,
+                }, __('Reset to saved default', PLUGIN_NAME))
             ),
             createElement(PanelBody, { title: __('Suggestions', PLUGIN_NAME), initialOpen: true },
                 !isSavedPost && createElement('p', null,
@@ -100,8 +167,22 @@ function InternalLinkerSidebar() {
                 ),
                 error && createElement(Notice, { status: 'error', isDismissible: false }, error),
                 loading && createElement(Spinner, null),
-                !loading && isSavedPost && suggestions.length === 0 && !error && createElement('p', null,
-                    __('No suggestions above the current threshold.', PLUGIN_NAME)
+                !loading && isSavedPost && suggestions.length === 0 && !error && createElement('div', {
+                    style: { padding: '0.5rem 0' },
+                },
+                    createElement('p', { style: { margin: '0 0 0.6rem', fontSize: '0.85rem' } },
+                        __('No semantic matches above threshold ', PLUGIN_NAME),
+                        createElement('strong', null, threshold.toFixed(2)),
+                        '.'
+                    ),
+                    createElement('p', { style: { margin: '0 0 0.8rem', fontSize: '0.8rem', color: '#6b7280' } },
+                        __('Try lowering the threshold above — 0.55 is the typical sweet spot. If you still see nothing, this post may be a standalone topic on your site (which is fine).', PLUGIN_NAME)
+                    ),
+                    createElement(Button, {
+                        variant: 'secondary',
+                        onClick: () => { setThreshold(0.5); setTimeout(fetchSuggestions, 50); },
+                        style: { width: '100%' },
+                    }, __('Try threshold 0.50', PLUGIN_NAME))
                 ),
                 !loading && suggestions.map((s) => createElement('div', {
                     key: s.post_id,

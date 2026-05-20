@@ -100,7 +100,11 @@ final class Plugin
         $this->provider_factory    = new ProviderFactory();
         $this->keyword_reader      = new TargetKeywordReader();
         $this->link_graph_scanner  = new LinkGraphScanner();
-        $this->orphan_report       = new OrphanReport($this->link_graph_scanner);
+        $this->orphan_report       = new OrphanReport(
+            $this->link_graph_scanner,
+            $this->vector_store,
+            $this->cosine
+        );
         $this->anchor_extractor    = new AnchorExtractor(
             $this->provider_factory,
             $this->cosine,
