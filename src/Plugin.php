@@ -20,6 +20,7 @@ use Champlin\InternalLinker\Indexing\ContentExtractor;
 use Champlin\InternalLinker\Indexing\ContentNormalizer;
 use Champlin\InternalLinker\Indexing\IndexQueue;
 use Champlin\InternalLinker\Integrations\TargetKeywordReader;
+use Champlin\InternalLinker\Reports\InsightsReport;
 use Champlin\InternalLinker\Reports\LinkGraphScanner;
 use Champlin\InternalLinker\Reports\OrphanReport;
 use Champlin\InternalLinker\REST\IndexController;
@@ -29,6 +30,7 @@ use Champlin\InternalLinker\Similarity\CosineCalculator;
 use Champlin\InternalLinker\Storage\Schema;
 use Champlin\InternalLinker\Storage\SuggestionLog;
 use Champlin\InternalLinker\Storage\VectorStore;
+use Champlin\InternalLinker\Admin\InsightsPage;
 use Champlin\InternalLinker\Admin\ReportsPage;
 
 final class Plugin
@@ -44,6 +46,8 @@ final class Plugin
     private TargetKeywordReader $keyword_reader;
     private LinkGraphScanner $link_graph_scanner;
     private OrphanReport $orphan_report;
+    private InsightsReport $insights_report;
+    private InsightsPage $insights_page;
     private SuggestionEngine $suggestion_engine;
     private AnchorExtractor $anchor_extractor;
     private IndexQueue $index_queue;
@@ -105,6 +109,7 @@ final class Plugin
             $this->vector_store,
             $this->cosine
         );
+        $this->insights_report     = new InsightsReport($wpdb, $this->link_graph_scanner);
         $this->anchor_extractor    = new AnchorExtractor(
             $this->provider_factory,
             $this->cosine,
@@ -127,6 +132,7 @@ final class Plugin
         $this->settings_page       = new SettingsPage();
         $this->indexer_page        = new IndexerPage($this->bulk_indexer);
         $this->reports_page        = new ReportsPage($this->orphan_report);
+        $this->insights_page       = new InsightsPage($this->insights_report);
         $this->editor_assets       = new EditorAssets();
         $this->suggestions_controller = new SuggestionsController(
             $this->suggestion_engine,
@@ -154,6 +160,7 @@ final class Plugin
         add_action('admin_menu', [$this->settings_page, 'register']);
         add_action('admin_menu', [$this->indexer_page, 'register']);
         add_action('admin_menu', [$this->reports_page, 'register']);
+        add_action('admin_menu', [$this->insights_page, 'register']);
         add_action('admin_init', [$this->settings_page, 'register_settings']);
 
         // Block editor sidebar.
