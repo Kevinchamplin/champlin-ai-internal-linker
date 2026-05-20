@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    .cil-wrap {
+        @apply text-slate-800;
+    }
+    .cil-card {
+        @apply bg-white border border-slate-200 rounded-lg p-6 shadow-sm mt-6 max-w-3xl;
+    }
+    .cil-footer-credit {
+        @apply text-xs text-slate-500 mt-8;
+    }
+    .cil-footer-credit a {
+        @apply text-slate-700 underline;
+    }
+}

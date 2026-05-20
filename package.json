@@ -1,0 +1,27 @@
+{
+    "name": "champlin-ai-internal-linker",
+    "version": "1.0.0",
+    "description": "Semantic internal-link suggestions for WordPress.",
+    "private": true,
+    "license": "MIT",
+    "scripts": {
+        "start": "wp-scripts start --webpack-src-dir=assets/editor --output-path=assets/dist/editor",
+        "build:editor": "wp-scripts build --webpack-src-dir=assets/editor --output-path=assets/dist/editor",
+        "build:admin": "tailwindcss -i ./assets/admin/admin.css -o ./assets/dist/admin/admin.css --minify",
+        "watch:admin": "tailwindcss -i ./assets/admin/admin.css -o ./assets/dist/admin/admin.css --watch",
+        "build": "npm run build:editor && npm run build:admin",
+        "lint:js": "wp-scripts lint-js assets/editor",
+        "format": "wp-scripts format assets/editor"
+    },
+    "devDependencies": {
+        "@wordpress/api-fetch": "^7.0.0",
+        "@wordpress/components": "^29.0.0",
+        "@wordpress/data": "^10.0.0",
+        "@wordpress/edit-post": "^8.0.0",
+        "@wordpress/element": "^6.0.0",
+        "@wordpress/i18n": "^5.0.0",
+        "@wordpress/plugins": "^7.0.0",
+        "@wordpress/scripts": "^28.0.0",
+        "tailwindcss": "^3.4.0"
+    }
+}

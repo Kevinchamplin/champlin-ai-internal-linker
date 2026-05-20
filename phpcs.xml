@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<ruleset name="champlin-ai-internal-linker">
+    <description>Coding standards for Champlin AI Internal Linker.</description>
+
+    <file>./src</file>
+    <file>./champlin-ai-internal-linker.php</file>
+    <file>./uninstall.php</file>
+    <file>./includes</file>
+
+    <exclude-pattern>./vendor/*</exclude-pattern>
+    <exclude-pattern>./tests/*</exclude-pattern>
+    <exclude-pattern>./assets/dist/*</exclude-pattern>
+
+    <arg value="sp"/>
+    <arg name="basepath" value="."/>
+    <arg name="colors"/>
+    <arg name="parallel" value="8"/>
+    <arg name="extensions" value="php"/>
+
+    <rule ref="WordPress">
+        <!-- We're PSR-4 + namespaced, not WP-classic file naming. -->
+        <exclude name="WordPress.Files.FileName"/>
+        <exclude name="WordPress.NamingConventions.ValidVariableName"/>
+    </rule>
+
+    <config name="testVersion" value="8.1-"/>
+    <rule ref="PHPCompatibilityWP"/>
+
+    <!-- Disallow dangerous functions outright. -->
+    <rule ref="Generic.PHP.ForbiddenFunctions">
+        <properties>
+            <property name="forbiddenFunctions" type="array">
+                <element key="eval" value="null"/>
+                <element key="extract" value="null"/>
+                <element key="create_function" value="null"/>
+            </property>
+        </properties>
+    </rule>
+
+    <rule ref="WordPress.WP.I18n">
+        <properties>
+            <property name="text_domain" type="array" value="champlin-internal-linker"/>
+        </properties>
+    </rule>
+</ruleset>
