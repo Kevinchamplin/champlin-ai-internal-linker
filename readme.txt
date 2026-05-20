@@ -4,7 +4,7 @@ Tags: internal links, seo, embeddings, ai, suggestions
 Requires at least: 6.4
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -84,6 +84,19 @@ GitHub: https://github.com/Kevinchamplin/champlin-ai-internal-linker
 3. Bulk re-index progress UI.
 
 == Changelog ==
+
+= 1.2.0 =
+* Add: Insights / ROI dashboard at Tools → AI Linker → Insights — links inserted, editor time saved, pages improved, OpenAI cost vs editor-time ROI multiple, 8-week activity chart, top-linked targets, most-active editors, recent activity.
+* Add: Inline-wrap link insertion — the Gutenberg sidebar now finds the suggested anchor in your draft and wraps THOSE words in the link, in place. No more "Related:" paragraphs at the end of the post. Falls back gracefully if the anchor isn't in the draft.
+* Add: CSV export of the full activity log from the Insights page.
+* Add: `cil_settings_render_extra` action — Pro and add-ons can inject custom settings panels.
+* Add: `cil_provider` filter — Pro's HostedProvider can drop in as the embedding source when a license is active.
+* Add: `cil_provider_summary` filter — Pro can tell Free's Settings page that hosted AI is active.
+* Add: `cil_extra_excluded_ids`, `cil_rank_results`, `cil_suggestion_row` filters for Pro to extend ranking + per-row display data.
+* Fix: Default similarity threshold lowered from 0.75 → 0.55 — calibrated to OpenAI text-embedding-3-small on real WordPress content. The old default returned zero suggestions on most sites.
+* Fix: AnchorExtractor trims sentences at word boundaries with no ellipsis, so anchors are always literal substrings of the source content (required by the inline-wrap path).
+* Fix: Threshold slider now defensively coerces values to real numbers — eliminates blank-input + bad-API-call edge case from v1.0.
+* Fix: Reports → Orphans now ships an inline "How to fix" workflow with top-3 inbound-candidate posts per orphan, computed from existing embeddings. Each candidate has a one-click "Open in editor" link with `?cil_open=1` that auto-opens the AI Linker sidebar.
 
 = 1.1.0 =
 * Add: Orphan Pages report — every published post with zero internal links pointing to it, with one-click "Edit" + manual re-scan button. Cached in a 6h transient; auto-invalidated on save_post / before_delete_post.

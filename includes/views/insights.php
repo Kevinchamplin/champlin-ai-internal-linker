@@ -29,6 +29,21 @@ $orphan_ratio     = (float) $insights['orphan_ratio'];
 
 $cil_version = defined('CIL_VERSION') ? CIL_VERSION : '';
 
+$weekly_series = (array) ($insights['weekly_series'] ?? []);
+$top_authors   = (array) ($insights['top_authors'] ?? []);
+$max_weekly    = 0;
+foreach ($weekly_series as $w) {
+    if ((int) $w['inserts'] > $max_weekly) {
+        $max_weekly = (int) $w['inserts'];
+    }
+}
+
+$csv_url = wp_nonce_url(
+    add_query_arg(['page' => \Champlin\InternalLinker\Admin\InsightsPage::MENU_SLUG, 'export' => 'csv']),
+    'cil_insights_csv',
+    '_cilnonce'
+);
+
 // Format minutes-saved as "Xh Ym"
 $time_saved_label = $minutes_saved >= 60
     ? sprintf('%dh %02dm', (int) floor($minutes_saved / 60), $minutes_saved % 60)
@@ -55,6 +70,10 @@ $roi_multiple = $cost > 0 ? round($time_value / $cost, 0) : 0;
             </div>
             <div class="cil-app-actions">
                 <?php if ($total_inserted > 0) : ?>
+                    <a href="<?php echo esc_url($csv_url); ?>" class="cil-btn cil-btn-ghost cil-btn-sm">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <?php esc_html_e('Export CSV', 'champlin-internal-linker'); ?>
+                    </a>
                     <span class="cil-pill cil-pill-success">
                         <span class="cil-pill-dot"></span>
                         <?php
@@ -198,6 +217,123 @@ $roi_multiple = $cost > 0 ? round($time_value / $cost, 0) : 0;
                 </span>
             </div>
         </div>
+
+        <!-- ============================================================
+             8-week activity chart
+             ============================================================ -->
+        <?php if (!empty($weekly_series)) :
+            $chart_w = 720;
+            $chart_h = 140;
+            $padding_l = 36;
+            $padding_r = 12;
+            $padding_t = 16;
+            $padding_b = 28;
+            $bar_count = count($weekly_series);
+            $bar_area_w = $chart_w - $padding_l - $padding_r;
+            $bar_w = max(8, floor($bar_area_w / $bar_count) - 8);
+            $bar_gap = floor(($bar_area_w - $bar_w * $bar_count) / max(1, $bar_count - 1));
+            $bar_h_max = $chart_h - $padding_t - $padding_b;
+            $y_scale = $max_weekly > 0 ? $bar_h_max / $max_weekly : 0;
+        ?>
+        <section class="cil-card" style="margin-bottom: 1.25rem;">
+            <header class="cil-card-header">
+                <div>
+                    <h2><?php esc_html_e('Activity — last 8 weeks', 'champlin-internal-linker'); ?></h2>
+                    <p class="cil-help"><?php esc_html_e('Accepted inline-link inserts per ISO week. Empty weeks render as zero so dips are visible.', 'champlin-internal-linker'); ?></p>
+                </div>
+            </header>
+            <div class="cil-card-body">
+                <svg viewBox="0 0 <?php echo (int) $chart_w; ?> <?php echo (int) $chart_h; ?>" preserveAspectRatio="xMidYMid meet" role="img" aria-label="<?php esc_attr_e('Weekly accepted links over the last 8 weeks', 'champlin-internal-linker'); ?>" style="width:100%;max-width:720px;height:auto;display:block;">
+                    <defs>
+                        <linearGradient id="cilBarGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#5eead4" stop-opacity="0.95"/>
+                            <stop offset="100%" stop-color="#14b8a6" stop-opacity="0.85"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Y-axis lines -->
+                    <?php for ($g = 0; $g <= 4; $g++):
+                        $y = $padding_t + ($bar_h_max / 4) * $g;
+                        $label_val = $max_weekly > 0 ? (int) round($max_weekly * (1 - $g / 4)) : 0;
+                    ?>
+                        <line x1="<?php echo (int) $padding_l; ?>" y1="<?php echo (int) $y; ?>" x2="<?php echo (int) ($chart_w - $padding_r); ?>" y2="<?php echo (int) $y; ?>" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="<?php echo $g === 4 ? '0' : '2 3'; ?>"/>
+                        <text x="<?php echo (int) ($padding_l - 6); ?>" y="<?php echo (int) ($y + 4); ?>" font-size="10" text-anchor="end" fill="#94a3b8" font-family="ui-monospace, monospace"><?php echo (int) $label_val; ?></text>
+                    <?php endfor; ?>
+
+                    <!-- Bars -->
+                    <?php foreach ($weekly_series as $i => $w):
+                        $h = $w['inserts'] > 0 ? max(2, (int) round($w['inserts'] * $y_scale)) : 0;
+                        $x = $padding_l + $i * ($bar_w + $bar_gap);
+                        $y = $padding_t + $bar_h_max - $h;
+                    ?>
+                        <rect x="<?php echo (int) $x; ?>" y="<?php echo (int) $y; ?>" width="<?php echo (int) $bar_w; ?>" height="<?php echo (int) $h; ?>" rx="3" fill="url(#cilBarGradient)">
+                            <title><?php echo esc_html(sprintf(_n('%d link in week of %s', '%d links in week of %s', $w['inserts'], 'champlin-internal-linker'), $w['inserts'], $w['week_label'])); ?></title>
+                        </rect>
+                        <?php if ($w['inserts'] > 0) : ?>
+                            <text x="<?php echo (int) ($x + $bar_w / 2); ?>" y="<?php echo (int) ($y - 6); ?>" font-size="10" text-anchor="middle" fill="#0f172a" font-family="'Space Grotesk', sans-serif" font-weight="600"><?php echo (int) $w['inserts']; ?></text>
+                        <?php endif; ?>
+                        <text x="<?php echo (int) ($x + $bar_w / 2); ?>" y="<?php echo (int) ($padding_t + $bar_h_max + 16); ?>" font-size="10" text-anchor="middle" fill="#64748b" font-family="ui-monospace, monospace"><?php echo esc_html($w['week_label']); ?></text>
+                    <?php endforeach; ?>
+                </svg>
+            </div>
+        </section>
+        <?php endif; ?>
+
+        <!-- ============================================================
+             Most active editors
+             ============================================================ -->
+        <?php if (!empty($top_authors)) : ?>
+        <section class="cil-card" style="margin-bottom: 1.25rem;">
+            <header class="cil-card-header">
+                <div>
+                    <h2><?php esc_html_e('Most active editors', 'champlin-internal-linker'); ?></h2>
+                    <p class="cil-help"><?php esc_html_e('Inserts attributed to the author of the source post. Useful for multi-author sites tracking who\'s using the plugin.', 'champlin-internal-linker'); ?></p>
+                </div>
+            </header>
+            <div class="cil-card-body--flush">
+                <div class="cil-table-wrap">
+                    <table class="cil-table">
+                        <thead>
+                            <tr>
+                                <th><?php esc_html_e('Editor', 'champlin-internal-linker'); ?></th>
+                                <th style="width: 140px;text-align:right;"><?php esc_html_e('Links inserted', 'champlin-internal-linker'); ?></th>
+                                <th style="width: 140px;text-align:right;"><?php esc_html_e('Pages improved', 'champlin-internal-linker'); ?></th>
+                                <th style="width: 160px;text-align:right;"><?php esc_html_e('Time saved', 'champlin-internal-linker'); ?></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($top_authors as $row):
+                                $author_mins = (int) $row['inserts'] * \Champlin\InternalLinker\Reports\InsightsReport::MINUTES_PER_LINK;
+                                $author_time = $author_mins >= 60
+                                    ? sprintf('%dh %02dm', (int) floor($author_mins / 60), $author_mins % 60)
+                                    : sprintf('%d min', $author_mins);
+                                $avatar = get_avatar_url($row['user_id'], ['size' => 36]);
+                            ?>
+                                <tr>
+                                    <td>
+                                        <div style="display:flex;align-items:center;gap:0.75rem;">
+                                            <?php if ($avatar) : ?>
+                                                <img src="<?php echo esc_url($avatar); ?>" alt="" width="32" height="32" style="border-radius:50%;display:block;flex-shrink:0;" />
+                                            <?php endif; ?>
+                                            <div>
+                                                <div style="color:#0f172a;font-weight:500;font-size:0.95rem;"><?php echo esc_html($row['display_name']); ?></div>
+                                                <div style="font-size:0.72rem;color:#94a3b8;"><?php
+                                                    /* translators: 1: user id */
+                                                    printf(esc_html__('user #%d', 'champlin-internal-linker'), (int) $row['user_id']);
+                                                ?></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align:right;font-family:'Space Grotesk',sans-serif;font-weight:600;color:#0f172a;"><?php echo esc_html((string) $row['inserts']); ?></td>
+                                    <td style="text-align:right;font-family:'Space Grotesk',sans-serif;color:#475569;"><?php echo esc_html((string) $row['pages_improved']); ?></td>
+                                    <td style="text-align:right;color:#0e7490;font-family:'JetBrains Mono',monospace;font-size:0.85rem;"><?php echo esc_html($author_time); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <?php endif; ?>
 
         <!-- Top targets -->
         <section class="cil-card">

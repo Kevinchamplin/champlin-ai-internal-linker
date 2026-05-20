@@ -40,6 +40,20 @@ final class InsightsPage
             wp_die(esc_html__('Administrator capability required.', 'champlin-internal-linker'));
         }
 
+        // CSV export branch — checked before the view renders to avoid HTML preamble.
+        if (isset($_GET['export']) && $_GET['export'] === 'csv') {
+            $nonce = isset($_GET['_cilnonce']) ? sanitize_text_field(wp_unslash((string) $_GET['_cilnonce'])) : '';
+            if (!wp_verify_nonce($nonce, 'cil_insights_csv')) {
+                wp_die(esc_html__('Invalid or expired security token.', 'champlin-internal-linker'));
+            }
+            nocache_headers();
+            $filename = sprintf('cil-activity-%s.csv', gmdate('Ymd-His'));
+            header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            $this->report->stream_activity_csv();
+            exit;
+        }
+
         $insights = $this->report->generate();
 
         $css = CIL_DIR . 'assets/dist/admin/admin.css';

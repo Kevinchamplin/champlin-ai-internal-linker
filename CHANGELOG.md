@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-05-20
+
+### Added (2026-05-20, insights-roi-dashboard) [2h]
+- **Insights / ROI dashboard** at Tools → AI Linker → Insights — links inserted, editor time saved (5 min/link × accepts), pages improved, OpenAI cost vs editor-time-value ROI multiple, 8-week SVG bar chart of accepted-insert activity, top-10 linked target posts, most-active editors table with avatars + time-saved-per-author, recent activity feed.
+- **CSV export** of the full activity log from the Insights page (`?export=csv` with nonce; streams via fputcsv to php://output).
+- **Inline-wrap link insertion** in the Gutenberg sidebar — finds the suggested anchor in the existing draft and wraps THOSE words in `<a href>`. Block walker recurses through paragraphs/headings/lists/quotes/columns/groups + their innerBlocks. Skips matches inside existing anchors or HTML attributes. Highlights the modified block + shows a Gutenberg snackbar confirming the link. Fallback to "Related:" paragraph + info notice when the anchor isn't found anywhere.
+- New extension hook `cil_settings_render_extra` (action) for Pro and add-ons to inject settings panels.
+- New extension hook `cil_provider_summary` (filter) so Pro can tell Free's Settings page that hosted AI is active.
+
+### Fixed (2026-05-20, calibration-+-inline-wrap-anchor-cleanup) [0.5h]
+- Default similarity threshold 0.75 → **0.55** — calibrated to OpenAI text-embedding-3-small on real WordPress content (genuinely related posts cluster 0.55–0.75; the 0.75 default returned zero suggestions in practice).
+- `AnchorExtractor::trim_to_phrase()` drops the ellipsis when truncating long sentences and trims at the nearest word boundary, so the returned anchor is always a literal substring of the source content (required for the inline-wrap path to find it).
+- Sidebar `RangeControl` defensively coerces `cilEditor.threshold` to a real `Number` — fixes a v1.0 edge case where `wp_localize_script` would hand back a stringified float that rendered the slider blank and made the API call send `threshold=undefined`.
+- Reports → Orphans now ships an inline "How to fix" workflow per orphan: top-3 inbound-candidate posts computed from existing embeddings, each with a one-click "Open in editor" link that auto-opens the AI Linker sidebar via `?cil_open=1`.
+
 ### Added (2026-05-20, sprint-2-day-1-hook-surface) [0.75h]
 - **Extension hooks** for the Pro plugin and community add-ons. Six new hooks comprising the public Pro API contract:
   - `cil_plugin_loaded` (action) — Pro registers its services after Free is wired up.
