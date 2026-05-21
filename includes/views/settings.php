@@ -283,6 +283,11 @@ $using_hosted_ai = !empty($provider_summary['active']);
              * @param array $settings Current cil_settings (sanitized).
              */
             do_action('cil_settings_render_extra', $settings);
+
+            // "Upgrade to Pro" panel: pricing cards + one-click install
+            // for customers who have already bought a license. Hidden when
+            // Pro is already active.
+            (new \Champlin\InternalLinker\Admin\UpgradeToProPanel())->render();
             ?>
 
             <!-- ============================================================

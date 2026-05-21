@@ -16,6 +16,7 @@ if (!defined('ABSPATH')) {
 use Champlin\InternalLinker\Admin\EditorAssets;
 use Champlin\InternalLinker\Admin\IndexerPage;
 use Champlin\InternalLinker\Admin\SettingsPage;
+use Champlin\InternalLinker\Admin\UpgradeToProPanel;
 use Champlin\InternalLinker\Embeddings\ProviderFactory;
 use Champlin\InternalLinker\Engine\AnchorExtractor;
 use Champlin\InternalLinker\Engine\SuggestionEngine;
@@ -63,6 +64,7 @@ final class Plugin
     private SuggestionsController $suggestions_controller;
     private IndexController $index_controller;
     private ReportsController $reports_controller;
+    private UpgradeToProPanel $upgrade_panel;
 
     public static function boot(): void
     {
@@ -147,6 +149,7 @@ final class Plugin
             $this->orphan_report,
             $this->link_graph_scanner
         );
+        $this->upgrade_panel       = new UpgradeToProPanel();
     }
 
     private function register(): void
@@ -178,6 +181,9 @@ final class Plugin
         // Invalidate the link graph cache whenever content is saved or deleted.
         add_action('save_post', [$this->link_graph_scanner, 'invalidate'], 25, 0);
         add_action('before_delete_post', [$this->link_graph_scanner, 'invalidate'], 25, 0);
+
+        // Upgrade-to-Pro panel (Settings page) + admin-post handler.
+        add_action('admin_post_' . UpgradeToProPanel::ACTION, [$this->upgrade_panel, 'handle_install']);
 
         // i18n.
         add_action('init', [$this, 'load_textdomain']);
