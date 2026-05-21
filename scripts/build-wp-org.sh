@@ -41,6 +41,8 @@ rsync -a \
   --exclude '.github' \
   --exclude '.phpunit.cache/' \
   --exclude '.phpcs.cache' \
+  --exclude '.plugin-check-errors.tsv' \
+  --exclude '.plugin-check-output.txt' \
   --exclude 'node_modules/' \
   --exclude 'scripts/' \
   --exclude 'dist/' \

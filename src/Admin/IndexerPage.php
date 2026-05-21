@@ -23,8 +23,8 @@ final class IndexerPage
     {
         add_submenu_page(
             SettingsPage::MENU_SLUG,
-            __('Re-index', 'champlin-internal-linker'),
-            __('Re-index', 'champlin-internal-linker'),
+            __('Re-index', 'champlin-ai-internal-linker'),
+            __('Re-index', 'champlin-ai-internal-linker'),
             'manage_options',
             self::MENU_SLUG,
             [$this, 'render']
@@ -34,7 +34,7 @@ final class IndexerPage
     public function render(): void
     {
         if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('Administrator capability required.', 'champlin-internal-linker'));
+            wp_die(esc_html__('Administrator capability required.', 'champlin-ai-internal-linker'));
         }
 
         $progress = $this->bulk_indexer->progress();
@@ -49,9 +49,9 @@ final class IndexerPage
         wp_localize_script('cil-indexer', 'cilIndexer', [
             'nonce'      => wp_create_nonce('wp_rest'),
             'rest'       => esc_url_raw(rest_url('cil/v1/index')),
-            'i18nStart'  => __('Start re-index', 'champlin-internal-linker'),
-            'i18nPause'  => __('Re-indexing in progress…', 'champlin-internal-linker'),
-            'i18nDone'   => __('Complete', 'champlin-internal-linker'),
+            'i18nStart'  => __('Start re-index', 'champlin-ai-internal-linker'),
+            'i18nPause'  => __('Re-indexing in progress…', 'champlin-ai-internal-linker'),
+            'i18nDone'   => __('Complete', 'champlin-ai-internal-linker'),
         ]);
 
         $css = CIL_DIR . 'assets/dist/admin/admin.css';

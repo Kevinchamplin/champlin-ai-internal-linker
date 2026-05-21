@@ -57,7 +57,7 @@ final class VectorStore
     {
         $table = Schema::table_embeddings();
 
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- table name from Schema::table_embeddings() is a constant identifier, post_id is bound.
         $row = $this->wpdb->get_row(
             $this->wpdb->prepare(
                 "SELECT embedding, model, dimensions, content_hash, indexed_at FROM {$table} WHERE post_id = %d",
@@ -65,6 +65,7 @@ final class VectorStore
             ),
             ARRAY_A
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared
 
         if (!$row) {
             return null;
@@ -86,13 +87,14 @@ final class VectorStore
     {
         $table = Schema::table_embeddings();
 
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- table name from Schema::table_embeddings() is a constant identifier, post_id is bound.
         $hash = $this->wpdb->get_var(
             $this->wpdb->prepare(
                 "SELECT content_hash FROM {$table} WHERE post_id = %d",
                 $post_id
             )
         );
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared
 
         return $hash === null ? null : (string) $hash;
     }
@@ -119,7 +121,7 @@ final class VectorStore
         $offset = 0;
         do {
             // Placeholder order matches the SQL string below: model, then exclude IDs, then limit/offset.
-            // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- table name from Schema::table_embeddings() is a constant identifier; $where_excluded is a generated %d placeholder list whose values are bound below.
             $rows = $this->wpdb->get_results(
                 $this->wpdb->prepare(
                     "SELECT post_id, embedding FROM {$table} WHERE model = %s{$where_excluded} ORDER BY post_id LIMIT %d OFFSET %d",
@@ -127,6 +129,7 @@ final class VectorStore
                 ),
                 ARRAY_A
             );
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared
 
             if (!$rows) {
                 break;

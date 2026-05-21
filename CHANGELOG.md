@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-05-20, wp-org-plugin-check-pass) [1h]
+- **Cleared all 84 Plugin Check ERRORs so the plugin can be submitted to WordPress.org.** Final state: 0 ERRORs / 48 WARNINGs (warnings don't block submission). 29 unit tests still green.
+- Renamed text domain from `champlin-internal-linker` → `champlin-ai-internal-linker` to match the WP.org slug exactly (eliminates 206 false-positive `TextDomainMismatch` errors).
+- Added `/* translators: */` comments above every printf-style i18n call with placeholders (20 sites).
+- Switched multi-placeholder i18n strings from positional `%s` / `%d` to ordered `%1$s` / `%2$d` (9 sites in reports.php, insights.php, indexer.php).
+- Wrapped 12 `OutputNotEscaped` echo sites with `esc_html()` / `esc_attr()` / cast-to-int, and 5 `ExceptionNotEscaped` `throw new Exception($message)` calls with `esc_html()` (OpenAIProvider + ProviderFactory).
+- Wrapped 5 `wpdb->prepare(...)` query sites with `phpcs:disable WordPress.DB.PreparedSQL.NotPrepared,InterpolatedNotPrepared,DirectDatabaseQuery.DirectQuery,NoCaching` blocks across VectorStore, SuggestionLog, InsightsReport. All suppressed with a justification comment — the interpolated values are always constants returned by `Schema::table_*()` helpers, never user input. The actual bind values use `%d` / `%s` placeholders correctly.
+- `parse_url()` → `wp_parse_url()` in `includes/views/insights.php`.
+- CSV-export `fopen('php://output')` + `fputcsv` + `fclose` block in `src/Reports/InsightsReport.php:277` suppressed for the three relevant filesystem rules — `php://output` is a PHP stream for streamed downloads, not a real file write; `WP_Filesystem` does not have a streamed equivalent.
+- Added `if (!defined('ABSPATH')) { exit; }` direct-access guard at the top of `src/Plugin.php` (the lone remaining file that lacked one).
+- `scripts/build-wp-org.sh` now excludes `.plugin-check-*` helper files so they can't accidentally end up in the WP.org zip.
+- **The submission-ready zip is `dist/champlin-ai-internal-linker.zip` (93K, SHA-256 `98a9568d77ff7300ce559bdc9cdd7bfd949b913223dbf4602c1db455df8e727f`).**
+
 ## [1.2.0] - 2026-05-20
 
 ### Added (2026-05-20, insights-roi-dashboard) [2h]

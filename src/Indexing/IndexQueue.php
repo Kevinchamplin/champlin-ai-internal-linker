@@ -60,7 +60,7 @@ final class IndexQueue
     public function enqueue(int $post_id): void
     {
         if (function_exists('as_enqueue_async_action')) {
-            as_enqueue_async_action(self::HOOK, ['post_id' => $post_id], 'champlin-internal-linker');
+            as_enqueue_async_action(self::HOOK, ['post_id' => $post_id], 'champlin-ai-internal-linker');
         } else {
             // Action Scheduler not present — run inline as a fallback.
             $this->run($post_id);

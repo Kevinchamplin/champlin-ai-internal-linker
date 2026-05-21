@@ -56,6 +56,6 @@ final class EditorAssets
             'maxSuggestions' => (int) $settings['max_suggestions'],
         ]);
 
-        wp_set_script_translations('cil-editor-sidebar', 'champlin-internal-linker');
+        wp_set_script_translations('cil-editor-sidebar', 'champlin-ai-internal-linker');
     }
 }

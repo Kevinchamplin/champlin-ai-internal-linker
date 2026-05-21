@@ -26,8 +26,8 @@ final class ReportsPage
     {
         add_submenu_page(
             SettingsPage::MENU_SLUG,
-            __('Reports', 'champlin-internal-linker'),
-            __('Reports', 'champlin-internal-linker'),
+            __('Reports', 'champlin-ai-internal-linker'),
+            __('Reports', 'champlin-ai-internal-linker'),
             'manage_options',
             self::MENU_SLUG,
             [$this, 'render']
@@ -37,7 +37,7 @@ final class ReportsPage
     public function render(): void
     {
         if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('Administrator capability required.', 'champlin-internal-linker'));
+            wp_die(esc_html__('Administrator capability required.', 'champlin-ai-internal-linker'));
         }
 
         $force  = isset($_GET['rescan']) && check_admin_referer('cil_rescan_orphans', '_cilnonce');

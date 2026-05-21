@@ -53,7 +53,7 @@ final class BulkIndexer
 
         // Enqueue the first batch; each batch enqueues the next when it finishes.
         if (function_exists('as_enqueue_async_action')) {
-            as_enqueue_async_action(self::HOOK, ['offset' => 0], 'champlin-internal-linker');
+            as_enqueue_async_action(self::HOOK, ['offset' => 0], 'champlin-ai-internal-linker');
         } else {
             $this->run_batch(0);
         }
@@ -99,7 +99,7 @@ final class BulkIndexer
             as_enqueue_async_action(
                 self::HOOK,
                 ['offset' => $offset + self::BATCH_SIZE],
-                'champlin-internal-linker'
+                'champlin-ai-internal-linker'
             );
         }
     }

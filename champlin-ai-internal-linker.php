@@ -10,7 +10,7 @@
  * Author URI:        https://champlinenterprises.com
  * License:           MIT
  * License URI:       https://opensource.org/licenses/MIT
- * Text Domain:       champlin-internal-linker
+ * Text Domain:       champlin-ai-internal-linker
  *
  * @package Champlin\InternalLinker
  */
@@ -25,7 +25,7 @@ define('CIL_VERSION', '1.2.0');
 define('CIL_FILE', __FILE__);
 define('CIL_DIR', plugin_dir_path(__FILE__));
 define('CIL_URL', plugin_dir_url(__FILE__));
-define('CIL_SLUG', 'champlin-internal-linker');
+define('CIL_SLUG', 'champlin-ai-internal-linker');
 define('CIL_DB_VERSION', '1');
 
 $cil_autoload = CIL_DIR . 'vendor/autoload.php';
@@ -34,7 +34,7 @@ if (!file_exists($cil_autoload)) {
         echo '<div class="notice notice-error"><p>';
         echo esc_html__(
             'Champlin AI Internal Linker: Composer dependencies are missing. Run "composer install" inside the plugin directory.',
-            'champlin-internal-linker'
+            'champlin-ai-internal-linker'
         );
         echo '</p></div>';
     });

@@ -15,14 +15,14 @@ use Champlin\InternalLinker\Embeddings\ProviderFactory;
 
 final class SettingsPage
 {
-    public const MENU_SLUG  = 'champlin-internal-linker';
+    public const MENU_SLUG  = 'champlin-ai-internal-linker';
     public const NONCE_NAME = 'cil_settings_nonce';
 
     public function register(): void
     {
         add_menu_page(
-            __('AI Internal Linker', 'champlin-internal-linker'),
-            __('AI Linker', 'champlin-internal-linker'),
+            __('AI Internal Linker', 'champlin-ai-internal-linker'),
+            __('AI Linker', 'champlin-ai-internal-linker'),
             'manage_options',
             self::MENU_SLUG,
             [$this, 'render'],
@@ -31,8 +31,8 @@ final class SettingsPage
         );
         add_submenu_page(
             self::MENU_SLUG,
-            __('Settings', 'champlin-internal-linker'),
-            __('Settings', 'champlin-internal-linker'),
+            __('Settings', 'champlin-ai-internal-linker'),
+            __('Settings', 'champlin-ai-internal-linker'),
             'manage_options',
             self::MENU_SLUG,
             [$this, 'render']
@@ -128,7 +128,7 @@ final class SettingsPage
     public function render(): void
     {
         if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('Administrator capability required.', 'champlin-internal-linker'));
+            wp_die(esc_html__('Administrator capability required.', 'champlin-ai-internal-linker'));
         }
 
         $settings   = ProviderFactory::settings();
