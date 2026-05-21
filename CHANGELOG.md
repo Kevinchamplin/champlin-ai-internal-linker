@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-05-20, free-to-pro-upgrade-panel) [1h]
+- **One-click Pro install inside Free's Settings page.** New `UpgradeToProPanel` (src/Admin/UpgradeToProPanel.php) renders a Premium / Agency pricing cards block + an "Already bought Pro?" expandable form. Submitting the form POSTs the customer's license key to `admin-post.php` → Free validates it against `linker-api.champlinenterprises.com/api/license/validate`, fetches the license-gated download URL from `/api/updates/metadata`, runs WordPress's stock `Plugin_Upgrader` to install + activate Pro, then persists the license key into `cilp_license_key` so Pro picks it up on first run.
+- Security: gated on `current_user_can('install_plugins')` + nonce; download URL is locked to the `linker-api.champlinenterprises.com` host so we can't be tricked into pulling arbitrary zips; rendering hides the panel entirely once Pro is active.
+- Panel uses Free's existing CSS tokens (cil-card / cil-pill / cil-btn) + a small inline `<style>` for the pricing card grid.
+- **readme.txt "External services" section rewritten** to disclose both endpoints per WP.org guidelines: OpenAI Embeddings (Free, when you save a post) and LinkWeaver license server (only when the customer pastes a license key). Both opt-in, both documented with "what it sends, when it's called, how to disable".
+- Plugin Check still 0 ERRORs after these additions. Tests still 29/29 green. Submission-ready zip rebuilt at `dist/champlin-ai-internal-linker.zip` (100K, SHA-256 `68a6d1d2d5be274f9552aa33a72bf3223ea4273fd26059d5a6e50633b7e12f65`).
+
 ### Fixed (2026-05-20, wp-org-plugin-check-pass) [1h]
 - **Cleared all 84 Plugin Check ERRORs so the plugin can be submitted to WordPress.org.** Final state: 0 ERRORs / 48 WARNINGs (warnings don't block submission). 29 unit tests still green.
 - Renamed text domain from `champlin-internal-linker` → `champlin-ai-internal-linker` to match the WP.org slug exactly (eliminates 206 false-positive `TextDomainMismatch` errors).

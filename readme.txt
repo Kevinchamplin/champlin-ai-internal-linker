@@ -35,10 +35,32 @@ Built for editorial teams who want better internal linking without the per-seat 
 
 = External services =
 
-This plugin connects to OpenAI's Embeddings API at https://api.openai.com/v1/embeddings to compute vector representations of your post content. You provide your own OpenAI API key in the Settings screen — no traffic is routed through Champlin Enterprises servers.
+This plugin connects to two external services. Both are opt-in — neither is contacted on plugin activation or during normal page loads.
 
-* OpenAI Terms of Service: https://openai.com/policies/terms-of-use
-* OpenAI Privacy Policy: https://openai.com/policies/privacy-policy
+**1. OpenAI Embeddings API** — https://api.openai.com/v1/embeddings
+
+What it does: computes a vector representation of your post content so the plugin can find semantically related posts.
+
+When it is called: only when you save a post (one request per indexed post) and when you open the AI Linker sidebar inside the block editor.
+
+What it sends: the text content of the post being indexed plus the model name (e.g. text-embedding-3-small). It does NOT send drafts, private posts, or any user-account data.
+
+How to disable: deactivate the plugin, or remove your API key in Settings.
+
+* OpenAI Terms: https://openai.com/policies/terms-of-use
+* OpenAI Privacy: https://openai.com/policies/privacy-policy
+
+**2. LinkWeaver license server** — https://linker-api.champlinenterprises.com
+
+What it does: validates an optional Premium license key + lets customers install the Premium add-on plugin (which is separately distributed) without leaving wp-admin.
+
+When it is called: ONLY when a customer who has purchased Premium pastes their license key into the Premium section of the Settings page and clicks "Install Pro". The plugin never contacts this server on its own.
+
+What it sends: the license key, the plugin slug, and the customer's site URL (so we can show the customer which sites they have activated).
+
+How to disable: do not paste a Premium license key. The Free tier never contacts this server.
+
+* Privacy + terms: https://linkweaver.app/legal
 
 No other external services are contacted.
 
