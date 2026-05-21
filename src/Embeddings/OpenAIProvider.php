@@ -97,7 +97,7 @@ final class OpenAIProvider implements ProviderInterface
 
                 // Retry on transient failures only.
                 if ($code !== 429 && ($code < 500 || $code > 599)) {
-                    throw new RuntimeException(sprintf('OpenAI returned HTTP %d: %s', $code, $raw));
+                    throw new RuntimeException(esc_html(sprintf('OpenAI returned HTTP %d: %s', $code, $raw)));
                 }
                 $last_error = sprintf('HTTP %d: %s', $code, $raw);
             } else {
@@ -111,7 +111,7 @@ final class OpenAIProvider implements ProviderInterface
             }
         }
 
-        throw new RuntimeException('OpenAI embedding failed after retries: ' . $last_error);
+        throw new RuntimeException(esc_html('OpenAI embedding failed after retries: ' . $last_error));
     }
 
     /**
@@ -124,11 +124,11 @@ final class OpenAIProvider implements ProviderInterface
             throw new RuntimeException('OpenAI response missing data payload.');
         }
         if (count($decoded['data']) !== $expected) {
-            throw new RuntimeException(sprintf(
+            throw new RuntimeException(esc_html(sprintf(
                 'OpenAI returned %d embeddings, expected %d.',
                 count($decoded['data']),
                 $expected
-            ));
+            )));
         }
 
         // Sort by 'index' to guarantee input-order alignment (OpenAI usually returns

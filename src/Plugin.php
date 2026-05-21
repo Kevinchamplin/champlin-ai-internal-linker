@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace Champlin\InternalLinker;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 use Champlin\InternalLinker\Admin\EditorAssets;
 use Champlin\InternalLinker\Admin\IndexerPage;
 use Champlin\InternalLinker\Admin\SettingsPage;
@@ -190,7 +194,7 @@ final class Plugin
     public function load_textdomain(): void
     {
         load_plugin_textdomain(
-            'champlin-internal-linker',
+            'champlin-ai-internal-linker',
             false,
             dirname(plugin_basename(CIL_FILE)) . '/languages/'
         );

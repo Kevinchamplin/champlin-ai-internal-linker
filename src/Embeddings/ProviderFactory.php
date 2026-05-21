@@ -78,7 +78,7 @@ final class ProviderFactory
                 (string) $settings['api_key'],
                 (string) $settings['model']
             ),
-            default  => throw new RuntimeException(sprintf('Unknown embedding provider: %s', $provider)),
+            default  => throw new RuntimeException(esc_html(sprintf('Unknown embedding provider: %s', $provider))),
         };
     }
 

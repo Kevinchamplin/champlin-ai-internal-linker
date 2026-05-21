@@ -62,12 +62,14 @@ final class InsightsReport
         // Acceptance + counts
         $total_inserted = (int) $this->wpdb->get_var("SELECT COUNT(*) FROM {$log_table} WHERE accepted = 1");
         $delivered      = (int) $this->wpdb->get_var("SELECT COUNT(*) FROM {$log_table}");
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- table name from Schema::table_suggestion_log() is a constant identifier; cutoff timestamp is bound.
         $inserted_30d   = (int) $this->wpdb->get_var(
             $this->wpdb->prepare(
                 "SELECT COUNT(*) FROM {$log_table} WHERE accepted = 1 AND created_at >= %s",
                 gmdate('Y-m-d H:i:s', time() - 30 * DAY_IN_SECONDS)
             )
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared
         $pages_improved = (int) $this->wpdb->get_var("SELECT COUNT(DISTINCT source_post_id) FROM {$log_table} WHERE accepted = 1");
         $acceptance_rate = $delivered > 0 ? round($total_inserted / $delivered, 4) : 0.0;
 
@@ -181,6 +183,7 @@ final class InsightsReport
         }
 
         $cutoff = gmdate('Y-m-d H:i:s', time() - 8 * 7 * DAY_IN_SECONDS);
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- table name from Schema::table_suggestion_log() is a constant identifier; cutoff is bound.
         $rows = $this->wpdb->get_results(
             $this->wpdb->prepare(
                 "SELECT DATE_FORMAT(created_at, '%%x-%%v') AS yw, COUNT(*) AS inserts
@@ -191,6 +194,7 @@ final class InsightsReport
             ),
             ARRAY_A
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared
         foreach ((array) $rows as $r) {
             $yw = (string) $r['yw'];
             if (isset($buckets[$yw])) {
@@ -256,13 +260,16 @@ final class InsightsReport
             ARRAY_A
         );
 
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- php://output stream, not a real file write.
         $fh = fopen('php://output', 'wb');
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fputcsv -- php://output stream, not a real file write.
         fputcsv($fh, [
             'created_at_utc', 'accepted', 'similarity',
             'source_post_id', 'source_title', 'source_author',
             'target_post_id', 'target_title',
         ]);
         foreach ((array) $rows as $r) {
+            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fputcsv -- php://output stream, not a real file write.
             fputcsv($fh, [
                 $r['created_at'],
                 (int) $r['accepted'],
@@ -274,6 +281,7 @@ final class InsightsReport
                 (string) ($r['target_title'] ?? ''),
             ]);
         }
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- php://output stream, not a real file write.
         fclose($fh);
     }
 

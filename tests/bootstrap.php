@@ -27,7 +27,7 @@ if (!defined('CIL_URL')) {
     define('CIL_URL', 'https://example.test/wp-content/plugins/champlin-ai-internal-linker/');
 }
 if (!defined('CIL_SLUG')) {
-    define('CIL_SLUG', 'champlin-internal-linker');
+    define('CIL_SLUG', 'champlin-ai-internal-linker');
 }
 if (!defined('CIL_DB_VERSION')) {
     define('CIL_DB_VERSION', '1');
