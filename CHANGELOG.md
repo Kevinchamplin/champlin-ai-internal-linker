@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-06-13, hosted-ai-indexing) [0.5h]
+- **Hosted-AI installs couldn't index.** `ProviderFactory::is_configured()` only checked for a site-level OpenAI key and returned false on hosted-AI installs (Premium, no site key), so `IndexQueue` bailed before embedding → 0 vectors stored, suggestions dead. Now also returns true when the `cil_provider` filter supplies a provider (the hosted-AI override). Bumped to 1.3.1. Bit the ccrstables pilot (jobs "completed" but stored nothing).
+
 ### Added (2026-06-13, elementor-support) [2h]
 - **Elementor extraction (v1.3).** New `ElementorExtractor` (src/Indexing) parses a page's `_elementor_data` element tree for text + internal-link anchors (headings, text-editor rich text with inline `<a href>`, button link controls), skipping video/embed URLs. JSON-tree parse rather than render — fast and reliable inside background Action Scheduler jobs.
   - `ContentExtractor` now appends Elementor content (builder pages usually have empty `post_content`), so Elementor text is embedded for suggestions.
