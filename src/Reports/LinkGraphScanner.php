@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Champlin\InternalLinker\Reports;
 
 use Champlin\InternalLinker\Embeddings\ProviderFactory;
+use Champlin\InternalLinker\Indexing\ElementorExtractor;
 
 final class LinkGraphScanner
 {
@@ -52,9 +53,10 @@ final class LinkGraphScanner
         $home       = (string) home_url('/');
         $host       = (string) wp_parse_url($home, PHP_URL_HOST);
 
-        $inbound = [];
-        $scanned = 0;
-        $paged   = 1;
+        $inbound   = [];
+        $scanned   = 0;
+        $paged     = 1;
+        $elementor = new ElementorExtractor();
 
         do {
             $query = new \WP_Query([
@@ -78,7 +80,15 @@ final class LinkGraphScanner
                     continue;
                 }
                 $content = (string) $post->post_content;
-                if ($content === '') {
+
+                // Elementor pages store their links in `_elementor_data`, not
+                // post_content — append them so builder pages aren't treated as
+                // orphans.
+                if ($elementor->is_elementor((int) $post->ID)) {
+                    $content .= "\n" . $elementor->extract((int) $post->ID);
+                }
+
+                if (trim($content) === '') {
                     continue;
                 }
 

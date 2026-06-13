@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2026-06-13, elementor-support) [2h]
+- **Elementor extraction (v1.3).** New `ElementorExtractor` (src/Indexing) parses a page's `_elementor_data` element tree for text + internal-link anchors (headings, text-editor rich text with inline `<a href>`, button link controls), skipping video/embed URLs. JSON-tree parse rather than render — fast and reliable inside background Action Scheduler jobs.
+  - `ContentExtractor` now appends Elementor content (builder pages usually have empty `post_content`), so Elementor text is embedded for suggestions.
+  - `LinkGraphScanner` now appends Elementor links and no longer skips builder pages with empty `post_content` — so Elementor pages stop being counted as orphans and the internal-link "structure" score reflects reality. Propagates through `OrphanReport` and the Pro audit's `structure_score` / `orphan_count` / `top_orphans`.
+  - 6 unit tests (`ElementorExtractorTest`). Bumped to 1.3.0.
+
 ### Changed (2026-06-13, wp-org-submission-packaging-compliance) [1.5h]
 - **Relicensed MIT → GPLv2-or-later** (WP.org norm; safest for review). Updated plugin header `License:`/`License URI:` in champlin-ai-internal-linker.php, the readme.txt header + body, composer.json, package.json, README.md, and replaced LICENSE with the full GPLv2 text.
 - **Fixed two build-script packaging bugs** in scripts/build-wp-org.sh that would have shipped a broken/bloated zip:
