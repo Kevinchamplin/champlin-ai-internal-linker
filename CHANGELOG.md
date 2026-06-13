@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-06-13, default-post-types-posts-and-pages) [0.25h]
+- **Default `post_types` is now `['post','page']`** (was `['post']`). Page-based / brochure / Elementor sites keep their linkable content in pages, so `post`-only indexed nothing useful out of the box. Existing installs with a saved selection are unaffected. v1.3.2.
+
 ### Fixed (2026-06-13, hosted-ai-indexing) [0.5h]
 - **Hosted-AI installs couldn't index.** `ProviderFactory::is_configured()` only checked for a site-level OpenAI key and returned false on hosted-AI installs (Premium, no site key), so `IndexQueue` bailed before embedding → 0 vectors stored, suggestions dead. Now also returns true when the `cil_provider` filter supplies a provider (the hosted-AI override). Bumped to 1.3.1. Bit the ccrstables pilot (jobs "completed" but stored nothing).
 
