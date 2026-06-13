@@ -33,6 +33,10 @@ echo "==> Building JS + CSS bundles"
 
 echo "==> Staging source in $BUILD_DIR/$SLUG"
 mkdir -p "$BUILD_DIR/$SLUG"
+# NOTE: exclude patterns are ANCHORED with a leading slash where they should only
+# match at the repo root. An unanchored 'dist/' also matches 'assets/dist/' and
+# silently strips the built editor JS/admin CSS from the package (the plugin then
+# enqueues nothing and the Gutenberg sidebar fails to load). Keep '/dist/' anchored.
 rsync -a \
   --exclude '.git' \
   --exclude '.gitignore' \
@@ -41,24 +45,30 @@ rsync -a \
   --exclude '.github' \
   --exclude '.phpunit.cache/' \
   --exclude '.phpcs.cache' \
+  --exclude '.idea/' \
+  --exclude '.vscode/' \
   --exclude '.plugin-check-errors.tsv' \
   --exclude '.plugin-check-output.txt' \
   --exclude 'node_modules/' \
-  --exclude 'scripts/' \
-  --exclude 'dist/' \
-  --exclude 'tests/' \
+  --exclude '/scripts/' \
+  --exclude '/dist/' \
+  --exclude '/tests/' \
+  --exclude '/docs/' \
   --exclude 'vendor/plugin-update-checker/' \
   --exclude 'README.md' \
   --exclude 'CONTRIBUTING.md' \
   --exclude 'SECURITY.md' \
+  --exclude 'CHANGELOG.md' \
   --exclude 'phpcs.xml' \
   --exclude 'phpunit.xml.dist' \
   --exclude 'tailwind.config.js' \
   --exclude 'package.json' \
   --exclude 'package-lock.json' \
   --exclude 'composer.lock' \
-  --exclude 'assets/editor/' \
-  --exclude 'assets/admin/' \
+  --exclude '*.mjs' \
+  --exclude '*.log' \
+  --exclude '/assets/editor/' \
+  --exclude '/assets/admin/' \
   "$REPO_ROOT/" "$BUILD_DIR/$SLUG/"
 
 echo "==> Stripping PUC integration from main plugin file"
@@ -81,6 +91,28 @@ if grep -rl "plugin-update-checker\|PucFactory\|YahnisElsts" "$BUILD_DIR/$SLUG" 
     exit 1
 fi
 echo "  Clean"
+
+echo "==> Verifying built front-end assets are present (regression guard)"
+for required in \
+  "assets/dist/editor/index.js" \
+  "assets/dist/editor/index.asset.php" \
+  "assets/dist/admin/admin.css"; do
+  if [ ! -f "$BUILD_DIR/$SLUG/$required" ]; then
+    echo "FAIL: missing built asset '$required' — the package would ship without the"
+    echo "      Gutenberg sidebar / admin styles. Did 'npm run build' run, and is the"
+    echo "      '/dist/' rsync exclude anchored so it does not eat 'assets/dist/'?"
+    exit 1
+  fi
+done
+echo "  Built assets present"
+
+echo "==> Verifying no stray dev/test files leaked into the package"
+if find "$BUILD_DIR/$SLUG" \( -name '*.mjs' -o -name 'phpcs.xml' -o -name 'phpunit.xml.dist' \) -print | grep -q .; then
+    echo "FAIL: stray dev/test files found in WP.org build:"
+    find "$BUILD_DIR/$SLUG" \( -name '*.mjs' -o -name 'phpcs.xml' -o -name 'phpunit.xml.dist' \) -print
+    exit 1
+fi
+echo "  No stray dev files"
 
 echo "==> PHP syntax check"
 ERR=0

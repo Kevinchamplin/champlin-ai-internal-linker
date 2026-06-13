@@ -59,8 +59,10 @@ final class InsightsReport
         $log_table = Schema::table_suggestion_log();
         $emb_table = Schema::table_embeddings();
 
-        // Acceptance + counts
+        // Acceptance + counts.
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from Schema::table_suggestion_log() is a constant identifier, no user input.
         $total_inserted = (int) $this->wpdb->get_var("SELECT COUNT(*) FROM {$log_table} WHERE accepted = 1");
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- constant table identifier, no user input.
         $delivered      = (int) $this->wpdb->get_var("SELECT COUNT(*) FROM {$log_table}");
         // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- table name from Schema::table_suggestion_log() is a constant identifier; cutoff timestamp is bound.
         $inserted_30d   = (int) $this->wpdb->get_var(
@@ -70,10 +72,12 @@ final class InsightsReport
             )
         );
         // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- constant table identifier, no user input.
         $pages_improved = (int) $this->wpdb->get_var("SELECT COUNT(DISTINCT source_post_id) FROM {$log_table} WHERE accepted = 1");
         $acceptance_rate = $delivered > 0 ? round($total_inserted / $delivered, 4) : 0.0;
 
-        // Indexing stats
+        // Indexing stats.
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- constant table identifier, no user input.
         $indexed = (int) $this->wpdb->get_var("SELECT COUNT(*) FROM {$emb_table}");
         $storage_kb = (int) round(($indexed * self::STORAGE_BYTES_PER_POST) / 1024);
         $estimated_cost = round($indexed * self::EMBEDDING_COST_PER_POST, 4);
@@ -88,6 +92,7 @@ final class InsightsReport
         $orphan_ratio = $orphan_total > 0 ? round($orphan_count / $orphan_total, 4) : 0.0;
 
         // Top 10 targets — posts receiving the most accepted inbound links from this plugin.
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- constant table identifier, no user input; static LIMIT.
         $top_targets_rows = $this->wpdb->get_results(
             "SELECT target_post_id, COUNT(*) AS inserts
              FROM {$log_table}
@@ -112,6 +117,7 @@ final class InsightsReport
         }
 
         // Recent 10 accepted inserts.
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- constant table identifier, no user input; static LIMIT.
         $recent_rows = $this->wpdb->get_results(
             "SELECT source_post_id, target_post_id, similarity, created_at
              FROM {$log_table}
@@ -212,6 +218,7 @@ final class InsightsReport
         $posts = $this->wpdb->posts;
         $users = $this->wpdb->users;
 
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- constant table identifiers ($log_table from Schema, $posts/$users from $wpdb); no user input; static LIMIT.
         $rows = $this->wpdb->get_results(
             "SELECT u.ID AS user_id, u.display_name,
                     COUNT(*) AS inserts,
@@ -248,6 +255,7 @@ final class InsightsReport
         $posts     = $this->wpdb->posts;
         $users     = $this->wpdb->users;
 
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- constant table identifiers ($log_table from Schema, $posts/$users from $wpdb); no user input.
         $rows = $this->wpdb->get_results(
             "SELECT l.created_at, l.accepted, l.similarity,
                     l.source_post_id, sp.post_title AS source_title, su.display_name AS source_author,

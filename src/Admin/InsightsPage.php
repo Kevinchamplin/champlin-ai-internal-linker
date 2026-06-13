@@ -41,7 +41,8 @@ final class InsightsPage
         }
 
         // CSV export branch — checked before the view renders to avoid HTML preamble.
-        if (isset($_GET['export']) && $_GET['export'] === 'csv') {
+        $export = isset($_GET['export']) ? sanitize_key(wp_unslash($_GET['export'])) : '';
+        if ('csv' === $export) {
             $nonce = isset($_GET['_cilnonce']) ? sanitize_text_field(wp_unslash((string) $_GET['_cilnonce'])) : '';
             if (!wp_verify_nonce($nonce, 'cil_insights_csv')) {
                 wp_die(esc_html__('Invalid or expired security token.', 'champlin-ai-internal-linker'));

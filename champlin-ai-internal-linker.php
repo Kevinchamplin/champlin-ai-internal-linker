@@ -8,8 +8,8 @@
  * Requires PHP:      8.1
  * Author:            Champlin Enterprises
  * Author URI:        https://champlinenterprises.com
- * License:           MIT
- * License URI:       https://opensource.org/licenses/MIT
+ * License:           GPLv2 or later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       champlin-ai-internal-linker
  *
  * @package Champlin\InternalLinker

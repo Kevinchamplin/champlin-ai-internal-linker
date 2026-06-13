@@ -1,8 +1,8 @@
 # Champlin AI Internal Linker
 
-Semantic internal-link suggestions for WordPress, powered by OpenAI embeddings. A free, MIT-licensed alternative to Link Whisper.
+Semantic internal-link suggestions for WordPress, powered by OpenAI embeddings. Free and GPL-licensed, with no per-seat fees.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: GPL v2+](https://img.shields.io/badge/License-GPLv2%2B-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 [![PHP](https://img.shields.io/badge/PHP-8.1%2B-blue.svg)](https://www.php.net/)
 [![WordPress](https://img.shields.io/badge/WordPress-6.4%2B-blue.svg)](https://wordpress.org/)
 
@@ -101,4 +101,4 @@ Activate via wp-admin → Plugins, then enter an OpenAI key in **AI Linker → S
 
 ## License
 
-MIT © Champlin Enterprises. See [LICENSE](./LICENSE).
+GPLv2 or later © Champlin Enterprises. See [LICENSE](./LICENSE).

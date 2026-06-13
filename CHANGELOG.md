@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-06-13, wp-org-submission-packaging-compliance) [1.5h]
+- **Relicensed MIT → GPLv2-or-later** (WP.org norm; safest for review). Updated plugin header `License:`/`License URI:` in champlin-ai-internal-linker.php, the readme.txt header + body, composer.json, package.json, README.md, and replaced LICENSE with the full GPLv2 text.
+- **Fixed two build-script packaging bugs** in scripts/build-wp-org.sh that would have shipped a broken/bloated zip:
+  - The unanchored `--exclude 'dist/'` was also matching `assets/dist/`, silently stripping the built Gutenberg sidebar JS + admin CSS from the package (the plugin then enqueues nothing — sidebar fails to load). Anchored it to `/dist/` and anchored the other root-only excludes.
+  - The zip was also bundling stray root-level `*.mjs` Casefile/test scripts, `docs/`, and `CHANGELOG.md`. Added excludes for `*.mjs`, `*.log`, `/docs/`, `CHANGELOG.md`, `.idea/`, `.vscode/`.
+  - Added two regression guards: fail the build if `assets/dist/editor/index.js` / `index.asset.php` / `assets/dist/admin/admin.css` are missing, or if any `*.mjs` / `phpcs.xml` / `phpunit.xml.dist` leaked in.
+- **readme.txt: removed the competitor trademark** "Link Whisper" from the Description (reworded to "without per-seat fees or recurring subscriptions") — competitor brand names in readme.txt are a review risk.
+- **Plugin Check hardening (warnings → clean), no functional change:** sanitized `$_GET['export']` with `sanitize_key(wp_unslash())` in InsightsPage; added documented `phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared` directives to the 6 constant-table-name queries in InsightsReport; debug-gated the two `error_log()` calls (IndexQueue, AnchorExtractor) behind `WP_DEBUG`.
+- Verified: 29/29 unit tests green; `php -l` clean on all touched files; final zip = 72 files / 107K, GPL header, PUC fully stripped, no node_modules/.git/dev files, built assets present.
+
 ### Added (2026-05-20, free-to-pro-upgrade-panel) [1h]
 - **One-click Pro install inside Free's Settings page.** New `UpgradeToProPanel` (src/Admin/UpgradeToProPanel.php) renders a Premium / Agency pricing cards block + an "Already bought Pro?" expandable form. Submitting the form POSTs the customer's license key to `admin-post.php` → Free validates it against `linker-api.champlinenterprises.com/api/license/validate`, fetches the license-gated download URL from `/api/updates/metadata`, runs WordPress's stock `Plugin_Upgrader` to install + activate Pro, then persists the license key into `cilp_license_key` so Pro picks it up on first run.
 - Security: gated on `current_user_can('install_plugins')` + nonce; download URL is locked to the `linker-api.champlinenterprises.com` host so we can't be tricked into pulling arbitrary zips; rendering hides the panel entirely once Pro is active.
