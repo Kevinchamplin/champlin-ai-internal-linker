@@ -3,7 +3,7 @@
  * Plugin Name:       Champlin AI Internal Linker
  * Plugin URI:        https://champlinenterprises.com/ai-internal-linker
  * Description:       Semantic internal-link suggestions powered by embeddings. One-click insert with auto-detected anchor text inside the block editor.
- * Version:           1.3.1
+ * Version:           1.3.2
  * Requires at least: 6.4
  * Requires PHP:      8.1
  * Author:            Champlin Enterprises
@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('CIL_VERSION', '1.3.1');
+define('CIL_VERSION', '1.3.2');
 define('CIL_FILE', __FILE__);
 define('CIL_DIR', plugin_dir_path(__FILE__));
 define('CIL_URL', plugin_dir_url(__FILE__));

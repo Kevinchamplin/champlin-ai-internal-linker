@@ -4,7 +4,7 @@ Tags: internal links, seo, embeddings, ai, suggestions
 Requires at least: 6.4
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.3.1
+Stable tag: 1.3.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -106,6 +106,9 @@ GitHub: https://github.com/Kevinchamplin/champlin-ai-internal-linker
 3. Bulk re-index progress UI.
 
 == Changelog ==
+
+= 1.3.2 =
+* Change: Default indexed post types are now **posts AND pages** (`['post','page']`). Page-based, brochure, and Elementor sites keep their linkable content in pages; the old `post`-only default did nothing for them out of the box. Existing sites with a saved post-type selection are unaffected.
 
 = 1.3.1 =
 * Fix: Hosted-AI installs (Premium with no site-level OpenAI key) could not index — `is_configured()` only checked for a site API key and bailed before the `cil_provider` filter (which supplies the hosted provider) was considered. Indexing + suggestions now work when the embedding provider is injected via the filter.

@@ -33,7 +33,10 @@ final class ProviderFactory
             // related→0.50–0.65, tangential→0.30–0.50, unrelated→<0.30.
             // 0.75 — our v1.0 default — was too strict; real content rarely crosses it.
             'threshold'        => 0.55,
-            'post_types'       => ['post'],
+            // Index posts AND pages by default — page-based / brochure / Elementor
+            // sites (a big share of real installs) keep their linkable content in
+            // pages, and 'post'-only does nothing for them out of the box.
+            'post_types'       => ['post', 'page'],
             'max_suggestions'  => 5,
             'ignored_post_ids' => [],
             'ignored_term_ids' => [],
