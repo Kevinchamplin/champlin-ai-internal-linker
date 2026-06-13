@@ -77,7 +77,10 @@ final class AnchorExtractor
         try {
             $bundle = $this->source_bundle($source);
         } catch (Throwable $e) {
-            error_log('[champlin-internal-linker] anchor source-bundle failed: ' . $e->getMessage());
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- debug-gated diagnostic only.
+                error_log('[champlin-internal-linker] anchor source-bundle failed: ' . $e->getMessage());
+            }
             return $fallback;
         }
         if ($bundle === null || $bundle['vectors'] === []) {

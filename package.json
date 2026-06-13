@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "Semantic internal-link suggestions for WordPress.",
     "private": true,
-    "license": "MIT",
+    "license": "GPL-2.0-or-later",
     "scripts": {
         "start": "wp-scripts start --webpack-src-dir=assets/editor --output-path=assets/dist/editor",
         "build:editor": "wp-scripts build --webpack-src-dir=assets/editor --output-path=assets/dist/editor",

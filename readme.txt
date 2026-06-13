@@ -5,8 +5,8 @@ Requires at least: 6.4
 Tested up to: 7.0
 Requires PHP: 8.1
 Stable tag: 1.2.0
-License: MIT
-License URI: https://opensource.org/licenses/MIT
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 Semantic internal-link suggestions powered by embeddings. One-click insert with auto-detected anchor text inside the block editor.
 
@@ -14,7 +14,7 @@ Semantic internal-link suggestions powered by embeddings. One-click insert with 
 
 Champlin AI Internal Linker uses OpenAI embeddings to suggest semantically relevant internal links while you write — directly inside the block editor sidebar. One click inserts the link with an auto-detected anchor phrase pulled from your actual draft, not a generic heading.
 
-Built for editorial teams who want better internal linking without the per-seat tax of legacy tools like Link Whisper.
+Built for editorial teams who want better internal linking without per-seat fees or recurring subscriptions.
 
 = Key features =
 
@@ -25,7 +25,7 @@ Built for editorial teams who want better internal linking without the per-seat 
 * Bulk re-index with progress UI for one-time backfills
 * SHA-256 content hashing skips re-embedding unchanged posts
 * Acceptance logging so accepted targets stop reappearing
-* Free, MIT, no per-seat fees, no telemetry
+* Free, GPL-licensed, no per-seat fees, no telemetry
 
 = What it does NOT do =
 
@@ -93,7 +93,7 @@ Inside your WordPress database, in two custom tables (`wp_cil_embeddings` and `w
 
 = Is this really free? =
 
-Yes. MIT-licensed, no per-seat tax, no premium upsell.
+Yes. GPL-licensed, no per-seat tax, no premium upsell.
 
 = Where can I report bugs or contribute? =
 

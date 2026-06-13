@@ -75,7 +75,10 @@ final class IndexQueue
         try {
             $this->index($post_id);
         } catch (Throwable $e) {
-            error_log(sprintf('[champlin-internal-linker] index failed for post %d: %s', $post_id, $e->getMessage()));
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- debug-gated diagnostic only.
+                error_log(sprintf('[champlin-internal-linker] index failed for post %d: %s', $post_id, $e->getMessage()));
+            }
             throw $e;
         }
     }
