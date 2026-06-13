@@ -10,11 +10,11 @@
  * Page builders covered:
  *   - Divi (its layout shortcodes [et_pb_*] expand to readable HTML)
  *   - WPBakery / Visual Composer (its [vc_*] shortcodes)
+ *   - Elementor (content lives in `_elementor_data` JSON, not post_content;
+ *     extracted via ElementorExtractor — text + internal-link anchors)
  *   - Any custom shortcodes registered on the site
  *
  * Not yet covered (deferred to a future release; tracked in CHANGELOG):
- *   - Elementor (stores JSON in `_elementor_data` meta — requires the
- *     Elementor plugin to be loaded at extraction time to render properly)
  *   - ACF text fields (no canonical "what text is searchable?" answer; needs
  *     per-field-group configuration)
  *
@@ -39,11 +39,31 @@ final class ContentExtractor
      */
     public function extract(WP_Post $post): string
     {
-        $raw = (string) $post->post_content;
-        if ($raw === '') {
-            return '';
+        $raw      = (string) $post->post_content;
+        $expanded = $raw === '' ? '' : $this->expand_shortcodes($raw, $post);
+
+        // Elementor keeps content in `_elementor_data`, not post_content — so a
+        // builder page often has empty/near-empty post_content. Append its
+        // parsed text + internal links so the page is visible to embeddings and
+        // the link graph.
+        $elementor = new ElementorExtractor();
+        if ($elementor->is_elementor((int) $post->ID)) {
+            $el = $elementor->extract((int) $post->ID);
+            if ($el !== '') {
+                $expanded = $expanded === '' ? $el : $expanded . "\n" . $el;
+            }
         }
 
+        return $expanded;
+    }
+
+    /**
+     * Expand shortcode-based page builders (Divi, WPBakery, custom shortcodes)
+     * into renderable HTML. Falls back to the raw content if expansion throws or
+     * collapses the text (some shortcodes return empty outside their runtime).
+     */
+    private function expand_shortcodes(string $raw, WP_Post $post): string
+    {
         if (!function_exists('do_shortcode')) {
             return $raw;
         }

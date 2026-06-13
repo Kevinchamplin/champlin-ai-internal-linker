@@ -4,7 +4,7 @@ Tags: internal links, seo, embeddings, ai, suggestions
 Requires at least: 6.4
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -106,6 +106,9 @@ GitHub: https://github.com/Kevinchamplin/champlin-ai-internal-linker
 3. Bulk re-index progress UI.
 
 == Changelog ==
+
+= 1.3.0 =
+* Add: Elementor support — pages built with Elementor (content stored in `_elementor_data`, not post_content) are now indexed for suggestions AND scanned for internal links. Previously every Elementor page looked orphaned and was invisible to the suggestion engine. Text + internal-link anchors are parsed from the saved element tree (headings, text-editor rich text, buttons), no rendering required.
 
 = 1.2.0 =
 * Add: Insights / ROI dashboard at Tools → AI Linker → Insights — links inserted, editor time saved, pages improved, OpenAI cost vs editor-time ROI multiple, 8-week activity chart, top-linked targets, most-active editors, recent activity.
