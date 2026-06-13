@@ -85,6 +85,15 @@ final class ProviderFactory
     public function is_configured(): bool
     {
         $settings = self::settings();
-        return trim((string) ($settings['api_key'] ?? '')) !== '';
+        if (trim((string) ($settings['api_key'] ?? '')) !== '') {
+            return true;
+        }
+
+        // A Pro add-on (Hosted AI) can inject a provider via the cil_provider
+        // filter — that counts as configured even with no site-level API key,
+        // otherwise indexing/suggestions would bail on hosted-AI installs.
+        $provider = (string) ($settings['provider'] ?? 'openai');
+
+        return apply_filters('cil_provider', null, $provider, $settings) instanceof ProviderInterface;
     }
 }
