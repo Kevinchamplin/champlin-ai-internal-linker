@@ -25,8 +25,8 @@ The build script:
 
 **Current state of the zip:**
 
-- Size: ~100K
-- 68 files
+- Size: ~110K
+- 73 files
 - Plugin Check: **0 ERRORs**, 48 warnings (warnings don't block submission)
 - 29 unit tests still pass
 
@@ -39,7 +39,7 @@ Before you click "Submit" on WP.org:
 - [ ] `bash scripts/build-wp-org.sh` ran successfully and produced `dist/champlin-ai-internal-linker.zip`
 - [ ] Plugin Check passes with 0 ERRORs (verify by running it locally on a fresh WP install with `--slug=champlin-ai-internal-linker`)
 - [ ] `readme.txt` "External services" section discloses both OpenAI and `linker-api.champlinenterprises.com` (it does — last verified 2026-05-20)
-- [ ] `champlin-ai-internal-linker.php` plugin header has `Version: 1.2.0` and `Text Domain: champlin-ai-internal-linker` (slug-matching)
+- [ ] `champlin-ai-internal-linker.php` plugin header has `Version: 1.3.2` and `Text Domain: champlin-ai-internal-linker` (slug-matching)
 - [ ] No `error_log()` calls remain unguarded (warnings only — won't block, but reviewers may comment)
 - [ ] You're submitting under the legal entity that will own the listing long-term (Champlin Enterprises LLC post-2026-06-01; pre-transition the listing will need to be re-papered)
 
@@ -212,5 +212,5 @@ These aren't blockers but should be done first:
 
 - [ ] Create the banner + icon + screenshot assets and commit to `assets/` in the SVN repo (after approval)
 - [ ] Confirm `champlinenterprises` is the right wordpress.org Contributor handle (it's listed in readme.txt:2)
-- [ ] Confirm Stable tag in readme.txt matches the Version in the plugin header (both should be `1.2.0` today)
+- [ ] Confirm Stable tag in readme.txt matches the Version in the plugin header (both should be `1.3.2` today)
 - [ ] Decide on the legal entity timing: submitting now under 815 Media vs waiting for the 2026-06-01 transition to Champlin Enterprises LLC. The listing will need to be re-papered if submitted under the wrong entity.
