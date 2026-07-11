@@ -2,6 +2,12 @@
 
 Step-by-step playbook for submitting the Free plugin to the WordPress.org plugin directory. Read top to bottom; do steps in order.
 
+> **STATUS: SUBMITTED 2026-07-11 — Awaiting Review.** Automated Plugin Scanning: **Pass**.
+> Slug assigned: `champlin-ai-internal-linker`. Review email goes to **kevin@815media.com** (the
+> wordpress.org account email) with subject "Review in Progress: Champlin AI Internal Linker" —
+> whitelist `plugins@wordpress.org`. Only one submission may be in review at a time. Public
+> Contributor on the listing is `champlinenterprises` (Champlin-branded, not 815).
+
 ---
 
 ## The file you upload
@@ -190,10 +196,14 @@ A few notes to pre-empt the usual questions:
    global functions are declared.
 
 6. PLUGIN CHECK
-   I've run wp plugin-check at home — 0 ERRORs against the latest
-   build. Warnings remaining are all in suppressed-with-justification
-   `phpcs:ignore` blocks (mostly around $wpdb->prepare with constant
-   table-name interpolation that the static analyzer can't follow).
+   0 ERRORs against this build. The remaining warnings are all in
+   known, defensible categories: (a) $wpdb table-name interpolation
+   where the table name is a plugin constant ($wpdb->prefix .
+   'cil_...'), never user input, so the static analyzer can't follow
+   it; (b) short-prefix naming — our hooks and constants use the
+   cil_/CIL_ prefix rather than the full plugin slug; and (c) a few
+   "Recommended" (not required) nonce checks on read-only admin views.
+   No user input reaches SQL unescaped.
 
 7. WORDPRESS-VERSION COMPATIBILITY
    Tested on 6.4, 6.5, 6.6, 6.7, 7.0. Requires PHP 8.1+ (strict types).

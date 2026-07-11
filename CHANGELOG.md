@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-11, plugin-check-warning-suppressions) [0.75h]
+- **Cleared 31 spurious Plugin Check warnings (52 → 21, still 0 errors)** ahead of the WP.org manual review. All comment-only except removing one dead call:
+  - Fixed **broken `phpcs:ignore` suppressions** in InsightsReport / VectorStore / SuggestionLog: single-line `phpcs:ignore` only covers the *next* line, but the flagged `FROM {$table}` sat 2–3 lines down in multi-line SQL, so the ignores silently missed. Converted to `phpcs:disable`/`enable` blocks and added the `PluginCheck.Security.DirectDB.UnescapedDBParameter` sniff. Table/column identifiers are `Schema::table_*()` / `$wpdb->posts|users` constants; values stay bound via `%s`/`%d`.
+  - Suppressed the `PreparedSQLPlaceholders.ReplacementsWrongNumber` **false positive** in `VectorStore::iterate_candidates()` (replacements passed via `...array_merge()` spread, which PHPCS can't count).
+  - Justified the read-only `$_GET` notice reads in `UpgradeToProPanel` (already sanitized; the Pro-install action itself is nonce-gated).
+  - **Removed `load_plugin_textdomain()`** — WP auto-loads translations for .org-hosted plugins and `languages/` is empty.
+  - The remaining 21 warnings are all intentional public-API naming (`cil_`/`CIL_` prefix — renaming would break the Pro add-on's hook contract) plus one `tax_query` perf advisory. No code/SQL/logic changed.
+
 ### Fixed (2026-07-11, wp-org-submission-plugin-uri) [0.25h]
 - **Dead `Plugin URI` fixed** in champlin-ai-internal-linker.php: `champlinenterprises.com/ai-internal-linker` (404) → `https://linkweaver.app/` (live product home, already the canonical URL in readme.txt + the submission runbook). Rebuilt the WP.org zip.
 - **Reconciled stale refs** in docs/WP_ORG_SUBMISSION.md (still said v1.2.0 / 68 files / ~100K → now v1.3.2 / 73 files / ~110K). Submission unblocked now that the first plugin (`champlin-pre-flight-audit`) is live on WP.org — WP.org allows only one submission in review at a time.

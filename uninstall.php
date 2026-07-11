@@ -21,8 +21,9 @@ $tables = [
 ];
 
 foreach ($tables as $table) {
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.SchemaChange,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- one-time uninstall cleanup; table name is a constant identifier ($wpdb->prefix + trusted suffix), not user input; caching is irrelevant when dropping tables.
     $wpdb->query("DROP TABLE IF EXISTS `{$table}`");
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.SchemaChange,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 }
 
 $options = [
