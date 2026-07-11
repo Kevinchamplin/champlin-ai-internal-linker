@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-11, wp-org-submission-plugin-uri) [0.25h]
+- **Dead `Plugin URI` fixed** in champlin-ai-internal-linker.php: `champlinenterprises.com/ai-internal-linker` (404) → `https://linkweaver.app/` (live product home, already the canonical URL in readme.txt + the submission runbook). Rebuilt the WP.org zip.
+- **Reconciled stale refs** in docs/WP_ORG_SUBMISSION.md (still said v1.2.0 / 68 files / ~100K → now v1.3.2 / 73 files / ~110K). Submission unblocked now that the first plugin (`champlin-pre-flight-audit`) is live on WP.org — WP.org allows only one submission in review at a time.
+
 ### Changed (2026-06-13, default-post-types-posts-and-pages) [0.25h]
 - **Default `post_types` is now `['post','page']`** (was `['post']`). Page-based / brochure / Elementor sites keep their linkable content in pages, so `post`-only indexed nothing useful out of the box. Existing installs with a saved selection are unaffected. v1.3.2.
 

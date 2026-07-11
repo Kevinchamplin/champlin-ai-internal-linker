@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       Champlin AI Internal Linker
- * Plugin URI:        https://champlinenterprises.com/ai-internal-linker
+ * Plugin URI:        https://linkweaver.app/
  * Description:       Semantic internal-link suggestions powered by embeddings. One-click insert with auto-detected anchor text inside the block editor.
  * Version:           1.3.2
  * Requires at least: 6.4
