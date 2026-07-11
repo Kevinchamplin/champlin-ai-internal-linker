@@ -191,6 +191,7 @@ final class Plugin
          *
          * @param Plugin $plugin The Free plugin container instance.
          */
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public extension hook; "cil_" is this plugin's established public-API prefix (LinkWeaver Pro depends on it).
         do_action('cil_plugin_loaded', $this);
     }
 

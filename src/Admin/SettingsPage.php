@@ -122,6 +122,7 @@ final class SettingsPage
          * @param array $sanitized Sanitized settings ready to persist.
          * @param array $input     Raw (un-sanitized) input from the settings form.
          */
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public extension hook; "cil_" is this plugin's established public-API prefix (LinkWeaver Pro depends on it).
         return (array) apply_filters('cil_settings_sanitized', $sanitized, is_array($input) ? $input : []);
     }
 

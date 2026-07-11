@@ -21,6 +21,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound, WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- "CIL_"/"cil_" is this plugin's established prefix.
 define('CIL_VERSION', '1.3.2');
 define('CIL_FILE', __FILE__);
 define('CIL_DIR', plugin_dir_path(__FILE__));
@@ -29,6 +30,7 @@ define('CIL_SLUG', 'champlin-ai-internal-linker');
 define('CIL_DB_VERSION', '1');
 
 $cil_autoload = CIL_DIR . 'vendor/autoload.php';
+// phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound, WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 if (!file_exists($cil_autoload)) {
     add_action('admin_notices', static function (): void {
         echo '<div class="notice notice-error"><p>';

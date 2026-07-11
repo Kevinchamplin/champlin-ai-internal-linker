@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2026-07-11, plugin-check-zero-warnings) [0.5h]
+- **Plugin Check now fully clean: 21 → 0 warnings (still 0 errors)** — "Checks complete. No errors found." Verified against the built zip on a real WP 7.0.1 + Plugin Check install. All comment-only / rename; no runtime behavior changed:
+  - Suppressed the intentional public-API **hook names** (`cil_provider_summary`, `cil_settings_render_extra`, `cil_provider` ×2, `cil_plugin_loaded`, `cil_settings_sanitized`, `cil_extra_excluded_ids`, `cil_rank_results`, `cil_suggestion_row`) with justified inline `phpcs:ignore NonPrefixedHooknameFound` — renaming would break LinkWeaver Pro's hook contract.
+  - Wrapped the `CIL_*` constants + `$cil_autoload` bootstrap var in a `phpcs:disable NonPrefixedConstantFound,NonPrefixedVariableFound` block.
+  - `uninstall.php`: prefixed the cleanup vars to `$cil_*` and wrapped the global-scope section in `phpcs:disable NonPrefixedVariableFound` (the sniff won't accept a 3-char prefix), and converted the transient-cleanup query's single-line `phpcs:ignore` to a `disable/enable` block so it actually covers the multi-line `$wpdb->query()`.
+  - Justified the `tax_query` perf advisory in `SuggestionEngine` (admin/indexing context, not front-end).
+
 ### Fixed (2026-07-11, plugin-check-warning-suppressions) [0.75h]
 - **Cleared 31 spurious Plugin Check warnings (52 → 21, still 0 errors)** ahead of the WP.org manual review. All comment-only except removing one dead call:
   - Fixed **broken `phpcs:ignore` suppressions** in InsightsReport / VectorStore / SuggestionLog: single-line `phpcs:ignore` only covers the *next* line, but the flagged `FROM {$table}` sat 2–3 lines down in multi-line SQL, so the ignores silently missed. Converted to `phpcs:disable`/`enable` blocks and added the `PluginCheck.Security.DirectDB.UnescapedDBParameter` sniff. Table/column identifiers are `Schema::table_*()` / `$wpdb->posts|users` constants; values stay bound via `%s`/`%d`.

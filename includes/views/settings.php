@@ -26,6 +26,7 @@ $cil_version = defined('CIL_VERSION') ? CIL_VERSION : '';
  *
  * @param array $summary { active: bool, label: string, hint: string }
  */
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public extension hook; "cil_" is this plugin's established public-API prefix (LinkWeaver Pro depends on it).
 $provider_summary = (array) apply_filters('cil_provider_summary', [
     'active' => false,
     'label'  => '',
@@ -282,6 +283,7 @@ $using_hosted_ai = !empty($provider_summary['active']);
              *
              * @param array $settings Current cil_settings (sanitized).
              */
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public extension hook; "cil_" is this plugin's established public-API prefix (LinkWeaver Pro depends on it).
             do_action('cil_settings_render_extra', $settings);
 
             // "Upgrade to Pro" panel: pricing cards + one-click install

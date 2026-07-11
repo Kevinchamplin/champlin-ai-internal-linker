@@ -61,6 +61,7 @@ final class SuggestionEngine
          * @param int     $source_post_id The post the user is editing.
          * @param array   $settings       Current cil_settings option.
          */
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public extension hook; "cil_" is this plugin's established public-API prefix (LinkWeaver Pro depends on it).
         $excluded = (array) apply_filters('cil_extra_excluded_ids', $base_excluded, $source_post_id, $settings);
         $excluded = array_values(array_unique(array_map('intval', $excluded)));
 
@@ -87,6 +88,7 @@ final class SuggestionEngine
          * @param int   $source_post_id  The post the user is editing.
          * @param array $settings        Current cil_settings option.
          */
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public extension hook; "cil_" is this plugin's established public-API prefix (LinkWeaver Pro depends on it).
         $ranked = (array) apply_filters('cil_rank_results', $ranked, $source_post_id, $settings);
 
         $keyword_reader = $this->keyword_reader ?? new TargetKeywordReader();
@@ -121,6 +123,7 @@ final class SuggestionEngine
              * @param array $row     Original ranked entry (post_id + similarity).
              * @param int   $source_post_id
              */
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public extension hook; "cil_" is this plugin's established public-API prefix (LinkWeaver Pro depends on it).
             $results[] = (array) apply_filters('cil_suggestion_row', $row_out, $row, $source_post_id);
         }
 
@@ -145,6 +148,7 @@ final class SuggestionEngine
             'posts_per_page' => -1,
             'fields'         => 'ids',
             'no_found_rows'  => true,
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Necessary taxonomy filter; runs in admin/indexing context, not on front-end page loads.
             'tax_query'      => [
                 [
                     'taxonomy'         => 'category',
