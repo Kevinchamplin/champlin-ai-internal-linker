@@ -60,24 +60,24 @@ final class InsightsReport
         $emb_table = Schema::table_embeddings();
 
         // Acceptance + counts.
-        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from Schema::table_suggestion_log() is a constant identifier, no user input.
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- table/column identifiers are constants (Schema::table_*(), $wpdb->posts/$wpdb->users), never user input; bound values use %s/%d placeholders.
         $total_inserted = (int) $this->wpdb->get_var("SELECT COUNT(*) FROM {$log_table} WHERE accepted = 1");
-        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- constant table identifier, no user input.
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- table/column identifiers are constants (Schema::table_*(), $wpdb->posts/$wpdb->users), never user input; bound values use %s/%d placeholders.
         $delivered      = (int) $this->wpdb->get_var("SELECT COUNT(*) FROM {$log_table}");
-        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- table name from Schema::table_suggestion_log() is a constant identifier; cutoff timestamp is bound.
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- table/column identifiers are constants (Schema::table_*(), $wpdb->posts/$wpdb->users), never user input; bound values use %s/%d placeholders.
         $inserted_30d   = (int) $this->wpdb->get_var(
             $this->wpdb->prepare(
                 "SELECT COUNT(*) FROM {$log_table} WHERE accepted = 1 AND created_at >= %s",
                 gmdate('Y-m-d H:i:s', time() - 30 * DAY_IN_SECONDS)
             )
         );
-        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared
-        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- constant table identifier, no user input.
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- table/column identifiers are constants (Schema::table_*(), $wpdb->posts/$wpdb->users), never user input; bound values use %s/%d placeholders.
         $pages_improved = (int) $this->wpdb->get_var("SELECT COUNT(DISTINCT source_post_id) FROM {$log_table} WHERE accepted = 1");
         $acceptance_rate = $delivered > 0 ? round($total_inserted / $delivered, 4) : 0.0;
 
         // Indexing stats.
-        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- constant table identifier, no user input.
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- table/column identifiers are constants (Schema::table_*(), $wpdb->posts/$wpdb->users), never user input; bound values use %s/%d placeholders.
         $indexed = (int) $this->wpdb->get_var("SELECT COUNT(*) FROM {$emb_table}");
         $storage_kb = (int) round(($indexed * self::STORAGE_BYTES_PER_POST) / 1024);
         $estimated_cost = round($indexed * self::EMBEDDING_COST_PER_POST, 4);
@@ -92,7 +92,7 @@ final class InsightsReport
         $orphan_ratio = $orphan_total > 0 ? round($orphan_count / $orphan_total, 4) : 0.0;
 
         // Top 10 targets — posts receiving the most accepted inbound links from this plugin.
-        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- constant table identifier, no user input; static LIMIT.
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- table/column identifiers are constants (Schema::table_*(), $wpdb->posts/$wpdb->users), never user input; bound values use %s/%d placeholders.
         $top_targets_rows = $this->wpdb->get_results(
             "SELECT target_post_id, COUNT(*) AS inserts
              FROM {$log_table}
@@ -102,6 +102,7 @@ final class InsightsReport
              LIMIT 10",
             ARRAY_A
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter
         $top_targets = [];
         foreach ((array) $top_targets_rows as $r) {
             $post = get_post((int) $r['target_post_id']);
@@ -117,7 +118,7 @@ final class InsightsReport
         }
 
         // Recent 10 accepted inserts.
-        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- constant table identifier, no user input; static LIMIT.
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- table/column identifiers are constants (Schema::table_*(), $wpdb->posts/$wpdb->users), never user input; bound values use %s/%d placeholders.
         $recent_rows = $this->wpdb->get_results(
             "SELECT source_post_id, target_post_id, similarity, created_at
              FROM {$log_table}
@@ -126,6 +127,7 @@ final class InsightsReport
              LIMIT 10",
             ARRAY_A
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter
         $recent_activity = [];
         foreach ((array) $recent_rows as $r) {
             $src = get_post((int) $r['source_post_id']);
@@ -189,7 +191,7 @@ final class InsightsReport
         }
 
         $cutoff = gmdate('Y-m-d H:i:s', time() - 8 * 7 * DAY_IN_SECONDS);
-        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- table name from Schema::table_suggestion_log() is a constant identifier; cutoff is bound.
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- table/column identifiers are constants (Schema::table_*(), $wpdb->posts/$wpdb->users), never user input; bound values use %s/%d placeholders.
         $rows = $this->wpdb->get_results(
             $this->wpdb->prepare(
                 "SELECT DATE_FORMAT(created_at, '%%x-%%v') AS yw, COUNT(*) AS inserts
@@ -200,7 +202,7 @@ final class InsightsReport
             ),
             ARRAY_A
         );
-        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter
         foreach ((array) $rows as $r) {
             $yw = (string) $r['yw'];
             if (isset($buckets[$yw])) {
@@ -218,7 +220,7 @@ final class InsightsReport
         $posts = $this->wpdb->posts;
         $users = $this->wpdb->users;
 
-        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- constant table identifiers ($log_table from Schema, $posts/$users from $wpdb); no user input; static LIMIT.
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- table/column identifiers are constants (Schema::table_*(), $wpdb->posts/$wpdb->users), never user input; bound values use %s/%d placeholders.
         $rows = $this->wpdb->get_results(
             "SELECT u.ID AS user_id, u.display_name,
                     COUNT(*) AS inserts,
@@ -232,6 +234,7 @@ final class InsightsReport
              LIMIT 10",
             ARRAY_A
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
         $out = [];
         foreach ((array) $rows as $r) {
@@ -255,7 +258,7 @@ final class InsightsReport
         $posts     = $this->wpdb->posts;
         $users     = $this->wpdb->users;
 
-        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- constant table identifiers ($log_table from Schema, $posts/$users from $wpdb); no user input.
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- table/column identifiers are constants (Schema::table_*(), $wpdb->posts/$wpdb->users), never user input; bound values use %s/%d placeholders.
         $rows = $this->wpdb->get_results(
             "SELECT l.created_at, l.accepted, l.similarity,
                     l.source_post_id, sp.post_title AS source_title, su.display_name AS source_author,
@@ -267,6 +270,7 @@ final class InsightsReport
              ORDER BY l.created_at DESC, l.id DESC",
             ARRAY_A
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
         // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- php://output stream, not a real file write.
         $fh = fopen('php://output', 'wb');

@@ -185,9 +185,6 @@ final class Plugin
         // Upgrade-to-Pro panel (Settings page) + admin-post handler.
         add_action('admin_post_' . UpgradeToProPanel::ACTION, [$this->upgrade_panel, 'handle_install']);
 
-        // i18n.
-        add_action('init', [$this, 'load_textdomain']);
-
         /**
          * Fires after Free has registered its core hooks. Pro add-ons listen for
          * this to register their own services, hooks, and admin sub-pages.
@@ -195,15 +192,6 @@ final class Plugin
          * @param Plugin $plugin The Free plugin container instance.
          */
         do_action('cil_plugin_loaded', $this);
-    }
-
-    public function load_textdomain(): void
-    {
-        load_plugin_textdomain(
-            'champlin-ai-internal-linker',
-            false,
-            dirname(plugin_basename(CIL_FILE)) . '/languages/'
-        );
     }
 
     public function vector_store(): VectorStore

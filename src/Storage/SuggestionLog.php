@@ -59,14 +59,14 @@ final class SuggestionLog
     public function accepted_targets_for(int $source_post_id): array
     {
         $table = Schema::table_suggestion_log();
-        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- table name from Schema::table_suggestion_log() is a constant identifier, source_post_id is bound.
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- table/column identifiers are constants (Schema::table_*(), $wpdb->posts/$wpdb->users), never user input; bound values use %s/%d placeholders.
         $rows = $this->wpdb->get_col(
             $this->wpdb->prepare(
                 "SELECT DISTINCT target_post_id FROM {$table} WHERE source_post_id = %d AND accepted = 1",
                 $source_post_id
             )
         );
-        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter
         return array_map('intval', $rows);
     }
 }

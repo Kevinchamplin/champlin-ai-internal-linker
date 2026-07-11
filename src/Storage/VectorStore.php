@@ -57,7 +57,7 @@ final class VectorStore
     {
         $table = Schema::table_embeddings();
 
-        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- table name from Schema::table_embeddings() is a constant identifier, post_id is bound.
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- table/column identifiers are constants (Schema::table_*(), $wpdb->posts/$wpdb->users), never user input; bound values use %s/%d placeholders.
         $row = $this->wpdb->get_row(
             $this->wpdb->prepare(
                 "SELECT embedding, model, dimensions, content_hash, indexed_at FROM {$table} WHERE post_id = %d",
@@ -65,7 +65,7 @@ final class VectorStore
             ),
             ARRAY_A
         );
-        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
         if (!$row) {
             return null;
@@ -87,14 +87,14 @@ final class VectorStore
     {
         $table = Schema::table_embeddings();
 
-        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- table name from Schema::table_embeddings() is a constant identifier, post_id is bound.
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- table/column identifiers are constants (Schema::table_*(), $wpdb->posts/$wpdb->users), never user input; bound values use %s/%d placeholders.
         $hash = $this->wpdb->get_var(
             $this->wpdb->prepare(
                 "SELECT content_hash FROM {$table} WHERE post_id = %d",
                 $post_id
             )
         );
-        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared
+        // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
         return $hash === null ? null : (string) $hash;
     }
@@ -121,7 +121,7 @@ final class VectorStore
         $offset = 0;
         do {
             // Placeholder order matches the SQL string below: model, then exclude IDs, then limit/offset.
-            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- table name from Schema::table_embeddings() is a constant identifier; $where_excluded is a generated %d placeholder list whose values are bound below.
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- table/column identifiers are constants (Schema::table_*(), $wpdb->posts/$wpdb->users), never user input; bound values use %s/%d placeholders; replacements are passed via array_merge() spread which PHPCS can't statically count.
             $rows = $this->wpdb->get_results(
                 $this->wpdb->prepare(
                     "SELECT post_id, embedding FROM {$table} WHERE model = %s{$where_excluded} ORDER BY post_id LIMIT %d OFFSET %d",
@@ -129,7 +129,7 @@ final class VectorStore
                 ),
                 ARRAY_A
             );
-            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared
+            // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 
             if (!$rows) {
                 break;
@@ -154,7 +154,7 @@ final class VectorStore
     public function count_indexed(): int
     {
         $table = Schema::table_embeddings();
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- table/column identifiers are constants (Schema::table_*(), $wpdb->posts/$wpdb->users), never user input; bound values use %s/%d placeholders.
         return (int) $this->wpdb->get_var("SELECT COUNT(*) FROM {$table}");
     }
 

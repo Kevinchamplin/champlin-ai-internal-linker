@@ -39,8 +39,10 @@ final class UpgradeToProPanel
     {
         $pro_active = $this->is_pro_active();
 
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended -- read-only admin notice display after a post-redirect-get; values are sanitized; the Pro-install action itself is nonce-gated (self::NONCE_FIELD).
         $notice = isset($_GET['cil_pro_install']) ? sanitize_key((string) $_GET['cil_pro_install']) : '';
         $notice_msg = isset($_GET['cil_pro_msg']) ? sanitize_text_field(wp_unslash((string) $_GET['cil_pro_msg'])) : '';
+        // phpcs:enable WordPress.Security.NonceVerification.Recommended
 
         ?>
         <div class="cil-card cil-card--accent cil-upgrade-pro">
