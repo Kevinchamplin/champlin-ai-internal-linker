@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (2026-07-11, wporg-remove-pro-installer) [0.75h]
+- **v1.3.3 — removed the in-dashboard Pro installer to clear WordPress.org's "storefront" rejection.** WP.org rejected the submission because the free plugin could download + install + activate the Pro add-on from `linker-api.champlinenterprises.com` inside wp-admin — the exact behavior their directory guidelines prohibit ("plugins that install plugins/themes from places other than WordPress.org"). The reviewer was correct; this was not a misclassification.
+  - `src/Admin/UpgradeToProPanel.php`: gutted to a pure informational upsell — pricing cards linking out to `linkweaver.app/buy/*` plus a link to the LinkWeaver account page. Removed `handle_install()`, the `Plugin_Upgrader`/`activate_plugin()` install path, the license-key form, the `LICENSE_API`/`UPDATES_API`/`TRUSTED_HOST`/`ACTION`/`NONCE_FIELD` constants, and `is_trusted_url()`/`redirect_with()`. Kept `is_pro_active()` state detection.
+  - `src/Plugin.php`: removed the `admin_post_cil_install_pro` handler registration and the now-orphaned `UpgradeToProPanel` import/property/instantiation (the settings view renders its own instance).
+  - `readme.txt`: External Services drops from two services to one — the free plugin now contacts **only** OpenAI; the LinkWeaver license server is gone. Added 1.3.3 changelog + upgrade notice.
+  - Pro buyers now install via Plugins → Add New → Upload Plugin (standard flow); once installed, Pro self-updates through its own updater. No free feature changed.
+
 ### Fixed (2026-07-11, plugin-check-zero-warnings) [0.5h]
 - **Plugin Check now fully clean: 21 → 0 warnings (still 0 errors)** — "Checks complete. No errors found." Verified against the built zip on a real WP 7.0.1 + Plugin Check install. All comment-only / rename; no runtime behavior changed:
   - Suppressed the intentional public-API **hook names** (`cil_provider_summary`, `cil_settings_render_extra`, `cil_provider` ×2, `cil_plugin_loaded`, `cil_settings_sanitized`, `cil_extra_excluded_ids`, `cil_rank_results`, `cil_suggestion_row`) with justified inline `phpcs:ignore NonPrefixedHooknameFound` — renaming would break LinkWeaver Pro's hook contract.

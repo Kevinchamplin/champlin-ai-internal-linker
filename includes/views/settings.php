@@ -286,7 +286,7 @@ $using_hosted_ai = !empty($provider_summary['active']);
             // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public extension hook; "cil_" is this plugin's established public-API prefix (LinkWeaver Pro depends on it).
             do_action('cil_settings_render_extra', $settings);
 
-            // "Upgrade to Pro" panel: pricing cards + one-click install
+            // "Upgrade to Pro" panel: pricing cards + link out to linkweaver.app
             // for customers who have already bought a license. Hidden when
             // Pro is already active.
             (new \Champlin\InternalLinker\Admin\UpgradeToProPanel())->render();
