@@ -71,6 +71,7 @@ final class ProviderFactory
          * @param string                 $provider The configured provider slug.
          * @param array                  $settings Current cil_settings.
          */
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public extension hook; "cil_" is this plugin's established public-API prefix (LinkWeaver Pro depends on it).
         $override = apply_filters('cil_provider', null, $provider, $settings);
         if ($override instanceof ProviderInterface) {
             return $override;
@@ -97,6 +98,7 @@ final class ProviderFactory
         // otherwise indexing/suggestions would bail on hosted-AI installs.
         $provider = (string) ($settings['provider'] ?? 'openai');
 
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public extension hook; "cil_" is this plugin's established public-API prefix (LinkWeaver Pro depends on it).
         return apply_filters('cil_provider', null, $provider, $settings) instanceof ProviderInterface;
     }
 }
