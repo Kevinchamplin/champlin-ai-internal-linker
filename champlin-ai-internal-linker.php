@@ -3,7 +3,7 @@
  * Plugin Name:       Champlin AI Internal Linker
  * Plugin URI:        https://linkweaver.app/
  * Description:       Semantic internal-link suggestions powered by embeddings. One-click insert with auto-detected anchor text inside the block editor.
- * Version:           1.3.2
+ * Version:           1.3.3
  * Requires at least: 6.4
  * Requires PHP:      8.1
  * Author:            Champlin Enterprises
@@ -22,7 +22,7 @@ if (!defined('ABSPATH')) {
 }
 
 // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound, WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- "CIL_"/"cil_" is this plugin's established prefix.
-define('CIL_VERSION', '1.3.2');
+define('CIL_VERSION', '1.3.3');
 define('CIL_FILE', __FILE__);
 define('CIL_DIR', plugin_dir_path(__FILE__));
 define('CIL_URL', plugin_dir_url(__FILE__));

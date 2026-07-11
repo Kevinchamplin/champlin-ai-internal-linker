@@ -4,7 +4,7 @@ Tags: internal links, seo, embeddings, ai, suggestions
 Requires at least: 6.4
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.3.2
+Stable tag: 1.3.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,9 +35,9 @@ Built for editorial teams who want better internal linking without per-seat fees
 
 = External services =
 
-This plugin connects to two external services. Both are opt-in — neither is contacted on plugin activation or during normal page loads.
+This plugin connects to one external service. It is opt-in — it is not contacted on plugin activation or during normal page loads.
 
-**1. OpenAI Embeddings API** — https://api.openai.com/v1/embeddings
+**OpenAI Embeddings API** — https://api.openai.com/v1/embeddings
 
 What it does: computes a vector representation of your post content so the plugin can find semantically related posts.
 
@@ -50,19 +50,7 @@ How to disable: deactivate the plugin, or remove your API key in Settings.
 * OpenAI Terms: https://openai.com/policies/terms-of-use
 * OpenAI Privacy: https://openai.com/policies/privacy-policy
 
-**2. LinkWeaver license server** — https://linker-api.champlinenterprises.com
-
-What it does: validates an optional Premium license key + lets customers install the Premium add-on plugin (which is separately distributed) without leaving wp-admin.
-
-When it is called: ONLY when a customer who has purchased Premium pastes their license key into the Premium section of the Settings page and clicks "Install Pro". The plugin never contacts this server on its own.
-
-What it sends: the license key, the plugin slug, and the customer's site URL (so we can show the customer which sites they have activated).
-
-How to disable: do not paste a Premium license key. The Free tier never contacts this server.
-
-* Privacy + terms: https://linkweaver.app/legal
-
-No other external services are contacted.
+No other external services are contacted. The optional LinkWeaver Pro add-on is a separate, self-hosted plugin you download and install yourself; this free plugin never downloads, installs, or activates it.
 
 == Installation ==
 
@@ -106,6 +94,9 @@ GitHub: https://github.com/Kevinchamplin/champlin-ai-internal-linker
 3. Bulk re-index progress UI.
 
 == Changelog ==
+
+= 1.3.3 =
+* Change: Removed the in-dashboard Pro installer. The "Upgrade to Pro" panel is now purely informational — it shows pricing and links out to your LinkWeaver account, where the optional Pro add-on is downloaded and installed like any other plugin (Plugins → Add New → Upload Plugin). The free plugin no longer downloads, installs, or activates anything, and no longer contacts the LinkWeaver license server. OpenAI is now the only external service the plugin contacts.
 
 = 1.3.2 =
 * Change: Default indexed post types are now **posts AND pages** (`['post','page']`). Page-based, brochure, and Elementor sites keep their linkable content in pages; the old `post`-only default did nothing for them out of the box. Existing sites with a saved post-type selection are unaffected.
@@ -152,6 +143,9 @@ GitHub: https://github.com/Kevinchamplin/champlin-ai-internal-linker
 * Anchor-extraction by sentence-level cosine against target title+excerpt.
 
 == Upgrade Notice ==
+
+= 1.3.3 =
+The in-dashboard Pro installer has been removed to meet WordPress.org directory guidelines. Pro is now downloaded from your LinkWeaver account and installed like any other plugin. No change to the free feature set.
 
 = 1.0.0 =
 Initial release.
