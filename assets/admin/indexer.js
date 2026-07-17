@@ -5,12 +5,12 @@
         return;
     }
 
-    const cfg = window.cilIndexer || {};
-    const startBtn = document.getElementById('cil-start-reindex');
-    const bar = document.getElementById('cil-progress-bar');
-    const progress = document.getElementById('cil-progress');
-    const text = document.getElementById('cil-progress-text');
-    const indexedCount = document.getElementById('cil-indexed-count');
+    const cfg = window.chailIndexer || {};
+    const startBtn = document.getElementById('chail-start-reindex');
+    const bar = document.getElementById('chail-progress-bar');
+    const progress = document.getElementById('chail-progress');
+    const text = document.getElementById('chail-progress-text');
+    const indexedCount = document.getElementById('chail-indexed-count');
 
     if (!startBtn || !progress) {
         return;
@@ -21,7 +21,7 @@
     window.wp.apiFetch.use(window.wp.apiFetch.createNonceMiddleware(cfg.nonce));
 
     function poll() {
-        window.wp.apiFetch({ path: '/cil/v1/index/progress' }).then((state) => {
+        window.wp.apiFetch({ path: '/chail/v1/index/progress' }).then((state) => {
             progress.value = state.processed;
             progress.max = Math.max(1, state.total);
             indexedCount.textContent = String(state.processed);
@@ -39,7 +39,7 @@
         startBtn.textContent = cfg.i18nPause;
         bar.style.display = 'block';
         window.wp.apiFetch({
-            path: '/cil/v1/index/start',
+            path: '/chail/v1/index/start',
             method: 'POST'
         }).then((state) => {
             progress.value = state.processed;

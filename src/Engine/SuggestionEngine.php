@@ -59,10 +59,9 @@ final class SuggestionEngine
          *
          * @param int[]   $excluded       Post IDs to skip during ranking.
          * @param int     $source_post_id The post the user is editing.
-         * @param array   $settings       Current cil_settings option.
+         * @param array   $settings       Current chail_settings option.
          */
-        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public extension hook; "cil_" is this plugin's established public-API prefix (LinkWeaver Pro depends on it).
-        $excluded = (array) apply_filters('cil_extra_excluded_ids', $base_excluded, $source_post_id, $settings);
+        $excluded = (array) apply_filters('chail_extra_excluded_ids', $base_excluded, $source_post_id, $settings);
         $excluded = array_values(array_unique(array_map('intval', $excluded)));
 
         $ranked = $this->cosine->rank(
@@ -86,10 +85,9 @@ final class SuggestionEngine
          *
          * @param array $ranked          Cosine-ranked candidates, descending.
          * @param int   $source_post_id  The post the user is editing.
-         * @param array $settings        Current cil_settings option.
+         * @param array $settings        Current chail_settings option.
          */
-        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public extension hook; "cil_" is this plugin's established public-API prefix (LinkWeaver Pro depends on it).
-        $ranked = (array) apply_filters('cil_rank_results', $ranked, $source_post_id, $settings);
+        $ranked = (array) apply_filters('chail_rank_results', $ranked, $source_post_id, $settings);
 
         $keyword_reader = $this->keyword_reader ?? new TargetKeywordReader();
 
@@ -123,8 +121,7 @@ final class SuggestionEngine
              * @param array $row     Original ranked entry (post_id + similarity).
              * @param int   $source_post_id
              */
-            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public extension hook; "cil_" is this plugin's established public-API prefix (LinkWeaver Pro depends on it).
-            $results[] = (array) apply_filters('cil_suggestion_row', $row_out, $row, $source_post_id);
+            $results[] = (array) apply_filters('chail_suggestion_row', $row_out, $row, $source_post_id);
         }
 
         return $results;

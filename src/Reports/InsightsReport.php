@@ -4,8 +4,8 @@
  * the editor, surfaced as a single dashboard payload.
  *
  * Numbers are computed from existing storage:
- *   - cil_suggestion_log → links delivered / accepted / acceptance rate
- *   - cil_embeddings     → indexed posts, storage bytes, estimated AI cost
+ *   - chail_suggestion_log → links delivered / accepted / acceptance rate
+ *   - chail_embeddings     → indexed posts, storage bytes, estimated AI cost
  *   - LinkGraphScanner   → orphan count + ratio (live)
  *
  * Time-saved estimate uses the widely-cited 5-minute-per-internal-link

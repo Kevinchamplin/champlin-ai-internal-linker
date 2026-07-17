@@ -22,7 +22,7 @@ use WP_Post;
 
 final class IndexQueue
 {
-    public const HOOK = 'cil_index_post';
+    public const HOOK = 'chail_index_post';
 
     private CosineCalculator $cosine;
     private ContentExtractor $extractor;

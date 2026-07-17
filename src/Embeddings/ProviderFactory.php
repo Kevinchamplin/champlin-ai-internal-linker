@@ -2,7 +2,7 @@
 /**
  * Construct the configured embedding provider.
  *
- * Reads settings from the cil_settings option. Today only OpenAI is wired up;
+ * Reads settings from the chail_settings option. Today only OpenAI is wired up;
  * the interface is in place so other providers can be added without touching
  * call sites.
  *
@@ -17,7 +17,7 @@ use RuntimeException;
 
 final class ProviderFactory
 {
-    public const OPTION_KEY = 'cil_settings';
+    public const OPTION_KEY = 'chail_settings';
 
     /**
      * @return array{provider: string, model: string, api_key: string, threshold: float, post_types: string[], max_suggestions: int, ignored_post_ids: int[], ignored_term_ids: int[]}
@@ -69,10 +69,9 @@ final class ProviderFactory
          *
          * @param ProviderInterface|null $override Pre-built provider, or null.
          * @param string                 $provider The configured provider slug.
-         * @param array                  $settings Current cil_settings.
+         * @param array                  $settings Current chail_settings.
          */
-        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public extension hook; "cil_" is this plugin's established public-API prefix (LinkWeaver Pro depends on it).
-        $override = apply_filters('cil_provider', null, $provider, $settings);
+        $override = apply_filters('chail_provider', null, $provider, $settings);
         if ($override instanceof ProviderInterface) {
             return $override;
         }
@@ -93,12 +92,11 @@ final class ProviderFactory
             return true;
         }
 
-        // A Pro add-on (Hosted AI) can inject a provider via the cil_provider
+        // A Pro add-on (Hosted AI) can inject a provider via the chail_provider
         // filter — that counts as configured even with no site-level API key,
         // otherwise indexing/suggestions would bail on hosted-AI installs.
         $provider = (string) ($settings['provider'] ?? 'openai');
 
-        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public extension hook; "cil_" is this plugin's established public-API prefix (LinkWeaver Pro depends on it).
-        return apply_filters('cil_provider', null, $provider, $settings) instanceof ProviderInterface;
+        return apply_filters('chail_provider', null, $provider, $settings) instanceof ProviderInterface;
     }
 }

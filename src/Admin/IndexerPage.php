@@ -40,30 +40,30 @@ final class IndexerPage
         $progress = $this->bulk_indexer->progress();
 
         wp_enqueue_script(
-            'cil-indexer',
-            CIL_URL . 'assets/admin/indexer.js',
+            'chail-indexer',
+            CHAIL_URL . 'assets/admin/indexer.js',
             ['wp-api-fetch'],
-            CIL_VERSION,
+            CHAIL_VERSION,
             true
         );
-        wp_localize_script('cil-indexer', 'cilIndexer', [
+        wp_localize_script('chail-indexer', 'chailIndexer', [
             'nonce'      => wp_create_nonce('wp_rest'),
-            'rest'       => esc_url_raw(rest_url('cil/v1/index')),
+            'rest'       => esc_url_raw(rest_url('chail/v1/index')),
             'i18nStart'  => __('Start re-index', 'champlin-ai-internal-linker'),
             'i18nPause'  => __('Re-indexing in progress…', 'champlin-ai-internal-linker'),
             'i18nDone'   => __('Complete', 'champlin-ai-internal-linker'),
         ]);
 
-        $css = CIL_DIR . 'assets/dist/admin/admin.css';
+        $css = CHAIL_DIR . 'assets/dist/admin/admin.css';
         if (file_exists($css)) {
             wp_enqueue_style(
-                'cil-admin',
-                CIL_URL . 'assets/dist/admin/admin.css',
+                'chail-admin',
+                CHAIL_URL . 'assets/dist/admin/admin.css',
                 [],
                 (string) filemtime($css)
             );
         }
 
-        require CIL_DIR . 'includes/views/indexer.php';
+        require CHAIL_DIR . 'includes/views/indexer.php';
     }
 }

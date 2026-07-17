@@ -19,8 +19,8 @@ final class EditorAssets
             return;
         }
 
-        $asset_php = CIL_DIR . 'assets/dist/editor/index.asset.php';
-        $script    = CIL_DIR . 'assets/dist/editor/index.js';
+        $asset_php = CHAIL_DIR . 'assets/dist/editor/index.asset.php';
+        $script    = CHAIL_DIR . 'assets/dist/editor/index.js';
 
         if (!file_exists($script)) {
             return;
@@ -28,34 +28,34 @@ final class EditorAssets
 
         $asset = file_exists($asset_php)
             ? (array) require $asset_php
-            : ['dependencies' => [], 'version' => CIL_VERSION];
+            : ['dependencies' => [], 'version' => CHAIL_VERSION];
 
         wp_enqueue_script(
-            'cil-editor-sidebar',
-            CIL_URL . 'assets/dist/editor/index.js',
+            'chail-editor-sidebar',
+            CHAIL_URL . 'assets/dist/editor/index.js',
             (array) ($asset['dependencies'] ?? []),
-            (string) ($asset['version'] ?? CIL_VERSION),
+            (string) ($asset['version'] ?? CHAIL_VERSION),
             true
         );
 
-        $css = CIL_DIR . 'assets/dist/editor/index.css';
+        $css = CHAIL_DIR . 'assets/dist/editor/index.css';
         if (file_exists($css)) {
             wp_enqueue_style(
-                'cil-editor-sidebar',
-                CIL_URL . 'assets/dist/editor/index.css',
+                'chail-editor-sidebar',
+                CHAIL_URL . 'assets/dist/editor/index.css',
                 ['wp-edit-blocks'],
                 (string) filemtime($css)
             );
         }
 
         $settings = ProviderFactory::settings();
-        wp_localize_script('cil-editor-sidebar', 'cilEditor', [
+        wp_localize_script('chail-editor-sidebar', 'chailEditor', [
             'nonce'          => wp_create_nonce('wp_rest'),
-            'restNamespace'  => 'cil/v1',
+            'restNamespace'  => 'chail/v1',
             'threshold'      => (float) $settings['threshold'],
             'maxSuggestions' => (int) $settings['max_suggestions'],
         ]);
 
-        wp_set_script_translations('cil-editor-sidebar', 'champlin-ai-internal-linker');
+        wp_set_script_translations('chail-editor-sidebar', 'champlin-ai-internal-linker');
     }
 }

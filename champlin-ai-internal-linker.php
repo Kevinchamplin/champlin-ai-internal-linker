@@ -3,7 +3,7 @@
  * Plugin Name:       Champlin AI Internal Linker
  * Plugin URI:        https://linkweaver.app/
  * Description:       Semantic internal-link suggestions powered by embeddings. One-click insert with auto-detected anchor text inside the block editor.
- * Version:           1.3.3
+ * Version:           1.3.4
  * Requires at least: 6.4
  * Requires PHP:      8.1
  * Author:            Champlin Enterprises
@@ -21,17 +21,15 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound, WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- "CIL_"/"cil_" is this plugin's established prefix.
-define('CIL_VERSION', '1.3.3');
-define('CIL_FILE', __FILE__);
-define('CIL_DIR', plugin_dir_path(__FILE__));
-define('CIL_URL', plugin_dir_url(__FILE__));
-define('CIL_SLUG', 'champlin-ai-internal-linker');
-define('CIL_DB_VERSION', '1');
+define('CHAIL_VERSION', '1.3.4');
+define('CHAIL_FILE', __FILE__);
+define('CHAIL_DIR', plugin_dir_path(__FILE__));
+define('CHAIL_URL', plugin_dir_url(__FILE__));
+define('CHAIL_SLUG', 'champlin-ai-internal-linker');
+define('CHAIL_DB_VERSION', '1');
 
-$cil_autoload = CIL_DIR . 'vendor/autoload.php';
-// phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound, WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
-if (!file_exists($cil_autoload)) {
+$chail_autoload = CHAIL_DIR . 'vendor/autoload.php';
+if (!file_exists($chail_autoload)) {
     add_action('admin_notices', static function (): void {
         echo '<div class="notice notice-error"><p>';
         echo esc_html__(
@@ -42,7 +40,7 @@ if (!file_exists($cil_autoload)) {
     });
     return;
 }
-require_once $cil_autoload;
+require_once $chail_autoload;
 
 /**
  * Auto-update from GitHub releases (REMOVE THIS BLOCK in the WP.org variant via build script).
@@ -51,18 +49,18 @@ require_once $cil_autoload;
  * surfaces new versions in wp-admin → Updates. No telemetry.
  */
 if (is_admin() || (defined('DOING_CRON') && DOING_CRON) || (defined('WP_CLI') && WP_CLI)) {
-    $cil_puc = CIL_DIR . 'vendor/plugin-update-checker/plugin-update-checker.php';
-    if (file_exists($cil_puc)) {
-        require_once $cil_puc;
+    $chail_puc = CHAIL_DIR . 'vendor/plugin-update-checker/plugin-update-checker.php';
+    if (file_exists($chail_puc)) {
+        require_once $chail_puc;
         if (class_exists('\YahnisElsts\PluginUpdateChecker\v5\PucFactory')) {
-            $cil_update_checker = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+            $chail_update_checker = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
                 'https://github.com/Kevinchamplin/champlin-ai-internal-linker/',
                 __FILE__,
                 'champlin-ai-internal-linker'
             );
-            $cil_vcs_api = $cil_update_checker->getVcsApi();
-            if (method_exists($cil_vcs_api, 'enableReleaseAssets')) {
-                $cil_vcs_api->enableReleaseAssets();
+            $chail_vcs_api = $chail_update_checker->getVcsApi();
+            if (method_exists($chail_vcs_api, 'enableReleaseAssets')) {
+                $chail_vcs_api->enableReleaseAssets();
             }
         }
     }

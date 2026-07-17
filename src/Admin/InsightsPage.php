@@ -43,12 +43,12 @@ final class InsightsPage
         // CSV export branch — checked before the view renders to avoid HTML preamble.
         $export = isset($_GET['export']) ? sanitize_key(wp_unslash($_GET['export'])) : '';
         if ('csv' === $export) {
-            $nonce = isset($_GET['_cilnonce']) ? sanitize_text_field(wp_unslash((string) $_GET['_cilnonce'])) : '';
-            if (!wp_verify_nonce($nonce, 'cil_insights_csv')) {
+            $nonce = isset($_GET['_chailnonce']) ? sanitize_text_field(wp_unslash((string) $_GET['_chailnonce'])) : '';
+            if (!wp_verify_nonce($nonce, 'chail_insights_csv')) {
                 wp_die(esc_html__('Invalid or expired security token.', 'champlin-ai-internal-linker'));
             }
             nocache_headers();
-            $filename = sprintf('cil-activity-%s.csv', gmdate('Ymd-His'));
+            $filename = sprintf('chail-activity-%s.csv', gmdate('Ymd-His'));
             header('Content-Type: text/csv; charset=utf-8');
             header('Content-Disposition: attachment; filename="' . $filename . '"');
             $this->report->stream_activity_csv();
@@ -57,16 +57,16 @@ final class InsightsPage
 
         $insights = $this->report->generate();
 
-        $css = CIL_DIR . 'assets/dist/admin/admin.css';
+        $css = CHAIL_DIR . 'assets/dist/admin/admin.css';
         if (file_exists($css)) {
             wp_enqueue_style(
-                'cil-admin',
-                CIL_URL . 'assets/dist/admin/admin.css',
+                'chail-admin',
+                CHAIL_URL . 'assets/dist/admin/admin.css',
                 [],
                 (string) filemtime($css)
             );
         }
 
-        require CIL_DIR . 'includes/views/insights.php';
+        require CHAIL_DIR . 'includes/views/insights.php';
     }
 }

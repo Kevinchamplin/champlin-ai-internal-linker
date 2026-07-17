@@ -19,7 +19,7 @@ use Champlin\InternalLinker\Indexing\ElementorExtractor;
 
 final class LinkGraphScanner
 {
-    public const TRANSIENT_KEY = 'cil_link_graph_v1';
+    public const TRANSIENT_KEY = 'chail_link_graph_v1';
     public const TRANSIENT_TTL = HOUR_IN_SECONDS * 6;
 
     /**

@@ -39,7 +39,18 @@
 
     <rule ref="WordPress.WP.I18n">
         <properties>
-            <property name="text_domain" type="array" value="champlin-internal-linker"/>
+            <property name="text_domain" type="array" value="champlin-ai-internal-linker"/>
+        </properties>
+    </rule>
+
+    <!-- Every plugin global uses the "chail" prefix (constants CHAIL_*, hooks/options/
+         transients chail_*, script handles chail-*) or the Champlin\InternalLinker namespace. -->
+    <rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+        <properties>
+            <property name="prefixes" type="array">
+                <element value="chail"/>
+                <element value="Champlin\InternalLinker"/>
+            </property>
         </properties>
     </rule>
 </ruleset>

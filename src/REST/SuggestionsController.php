@@ -1,7 +1,7 @@
 <?php
 /**
- * GET /cil/v1/suggestions/{post_id}
- * POST /cil/v1/suggestions/{post_id}/accept
+ * GET /chail/v1/suggestions/{post_id}
+ * POST /chail/v1/suggestions/{post_id}/accept
  *
  * @package Champlin\InternalLinker\REST
  */
@@ -81,7 +81,7 @@ final class SuggestionsController extends BaseController
 
         if (!current_user_can('edit_post', $post_id)) {
             return new WP_Error(
-                'cil_forbidden',
+                'chail_forbidden',
                 __('You cannot edit this post.', 'champlin-ai-internal-linker'),
                 ['status' => 403]
             );
@@ -104,7 +104,7 @@ final class SuggestionsController extends BaseController
 
         if (!current_user_can('edit_post', $post_id)) {
             return new WP_Error(
-                'cil_forbidden',
+                'chail_forbidden',
                 __('You cannot edit this post.', 'champlin-ai-internal-linker'),
                 ['status' => 403]
             );

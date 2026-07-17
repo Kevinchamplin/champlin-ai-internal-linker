@@ -15,10 +15,10 @@ import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
 
 const PLUGIN_NAME = 'champlin-internal-linker';
-const SIDEBAR_NAME = 'cil-sidebar';
+const SIDEBAR_NAME = 'chail-sidebar';
 
 /**
- * If the editor URL carries `?cil_open=1`, auto-open the sidebar once the
+ * If the editor URL carries `?chail_open=1`, auto-open the sidebar once the
  * editor is ready. This is what fixes the orphan-report workflow — the
  * candidate "Open in editor" buttons append that param so users land here
  * with the sidebar already open instead of hunting in the kebab menu.
@@ -26,13 +26,13 @@ const SIDEBAR_NAME = 'cil-sidebar';
 function maybeAutoOpenSidebar() {
     try {
         const params = new URLSearchParams(window.location.search);
-        if (params.get('cil_open') !== '1') return;
-        if (window.__cilSidebarAutoOpened) return;
+        if (params.get('chail_open') !== '1') return;
+        if (window.__chailSidebarAutoOpened) return;
         const tryOpen = () => {
             const editPost = wpDispatch('core/edit-post');
             if (editPost && typeof editPost.openGeneralSidebar === 'function') {
                 editPost.openGeneralSidebar(`${PLUGIN_NAME}/${SIDEBAR_NAME}`);
-                window.__cilSidebarAutoOpened = true;
+                window.__chailSidebarAutoOpened = true;
                 return true;
             }
             return false;
@@ -54,7 +54,7 @@ maybeAutoOpenSidebar();
  * can occasionally hand back stringified floats depending on WP version and
  * sandbox, and a string value passed to RangeControl renders blank.
  */
-const rawCfg = window.cilEditor || {};
+const rawCfg = window.chailEditor || {};
 const DEFAULT_THRESHOLD = 0.55;   // calibrated for OpenAI text-embedding-3-small
 const DEFAULT_MAX_SUGGESTIONS = 5;
 
@@ -69,7 +69,7 @@ function coerceInt(value, fallback) {
 
 const cfg = {
     nonce:          typeof rawCfg.nonce === 'string'         ? rawCfg.nonce         : '',
-    restNamespace:  typeof rawCfg.restNamespace === 'string' ? rawCfg.restNamespace : 'cil/v1',
+    restNamespace:  typeof rawCfg.restNamespace === 'string' ? rawCfg.restNamespace : 'chail/v1',
     threshold:      coerceFloat(rawCfg.threshold,      DEFAULT_THRESHOLD),
     maxSuggestions: coerceInt(rawCfg.maxSuggestions,   DEFAULT_MAX_SUGGESTIONS),
 };
@@ -236,11 +236,11 @@ function InternalLinkerSidebar() {
     }
 
     return createElement(Fragment, null,
-        createElement(PluginSidebarMoreMenuItem, { target: 'cil-sidebar', icon: 'admin-links' },
+        createElement(PluginSidebarMoreMenuItem, { target: 'chail-sidebar', icon: 'admin-links' },
             __('AI Internal Linker', PLUGIN_NAME)
         ),
         createElement(PluginSidebar, {
-            name: 'cil-sidebar',
+            name: 'chail-sidebar',
             title: __('AI Internal Linker', PLUGIN_NAME),
             icon: 'admin-links',
         },
@@ -289,7 +289,7 @@ function InternalLinkerSidebar() {
                 ),
                 !loading && suggestions.map((s) => createElement('div', {
                     key: s.post_id,
-                    className: 'cil-suggestion',
+                    className: 'chail-suggestion',
                     style: { padding: '0.75em 0', borderBottom: '1px solid #e5e7eb' },
                 },
                     createElement('strong', null, s.title),
