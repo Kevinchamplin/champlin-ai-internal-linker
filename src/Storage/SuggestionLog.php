@@ -1,6 +1,6 @@
 <?php
 /**
- * CRUD on the cil_suggestion_log table.
+ * CRUD on the chail_suggestion_log table.
  *
  * @package Champlin\InternalLinker\Storage
  */

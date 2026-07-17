@@ -1,7 +1,7 @@
 <?php
 /**
- * POST /cil/v1/index/start    — Begin a bulk re-index.
- * GET  /cil/v1/index/progress — Poll progress.
+ * POST /chail/v1/index/start    — Begin a bulk re-index.
+ * GET  /chail/v1/index/progress — Poll progress.
  *
  * @package Champlin\InternalLinker\REST
  */

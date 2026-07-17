@@ -16,7 +16,7 @@ use Champlin\InternalLinker\Embeddings\ProviderFactory;
 final class SettingsPage
 {
     public const MENU_SLUG  = 'champlin-ai-internal-linker';
-    public const NONCE_NAME = 'cil_settings_nonce';
+    public const NONCE_NAME = 'chail_settings_nonce';
 
     public function register(): void
     {
@@ -42,7 +42,7 @@ final class SettingsPage
     public function register_settings(): void
     {
         register_setting(
-            'cil_settings_group',
+            'chail_settings_group',
             ProviderFactory::OPTION_KEY,
             [
                 'type'              => 'array',
@@ -122,8 +122,7 @@ final class SettingsPage
          * @param array $sanitized Sanitized settings ready to persist.
          * @param array $input     Raw (un-sanitized) input from the settings form.
          */
-        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public extension hook; "cil_" is this plugin's established public-API prefix (LinkWeaver Pro depends on it).
-        return (array) apply_filters('cil_settings_sanitized', $sanitized, is_array($input) ? $input : []);
+        return (array) apply_filters('chail_settings_sanitized', $sanitized, is_array($input) ? $input : []);
     }
 
     public function render(): void
@@ -137,16 +136,16 @@ final class SettingsPage
 
         $this->enqueue_admin_assets();
 
-        require CIL_DIR . 'includes/views/settings.php';
+        require CHAIL_DIR . 'includes/views/settings.php';
     }
 
     private function enqueue_admin_assets(): void
     {
-        $css = CIL_DIR . 'assets/dist/admin/admin.css';
+        $css = CHAIL_DIR . 'assets/dist/admin/admin.css';
         if (file_exists($css)) {
             wp_enqueue_style(
-                'cil-admin',
-                CIL_URL . 'assets/dist/admin/admin.css',
+                'chail-admin',
+                CHAIL_URL . 'assets/dist/admin/admin.css',
                 [],
                 (string) filemtime($css)
             );

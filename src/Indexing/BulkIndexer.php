@@ -3,7 +3,7 @@
  * Bulk re-index a site by paginating through published posts and enqueuing
  * Action Scheduler jobs in fixed-size batches.
  *
- * Progress is tracked in the cil_bulk_progress option so the admin UI can
+ * Progress is tracked in the chail_bulk_progress option so the admin UI can
  * poll a REST endpoint.
  *
  * @package Champlin\InternalLinker\Indexing
@@ -17,8 +17,8 @@ use Champlin\InternalLinker\Embeddings\ProviderFactory;
 
 final class BulkIndexer
 {
-    public const HOOK         = 'cil_bulk_index_batch';
-    public const OPTION_STATE = 'cil_bulk_progress';
+    public const HOOK         = 'chail_bulk_index_batch';
+    public const OPTION_STATE = 'chail_bulk_progress';
     public const BATCH_SIZE   = 25;
 
     public function __construct(private IndexQueue $index_queue)

@@ -27,7 +27,7 @@ $storage_kb       = (int) $insights['storage_kb'];
 $orphan_count     = (int) $insights['orphan_count'];
 $orphan_ratio     = (float) $insights['orphan_ratio'];
 
-$cil_version = defined('CIL_VERSION') ? CIL_VERSION : '';
+$chail_version = defined('CHAIL_VERSION') ? CHAIL_VERSION : '';
 
 $weekly_series = (array) ($insights['weekly_series'] ?? []);
 $top_authors   = (array) ($insights['top_authors'] ?? []);
@@ -40,8 +40,8 @@ foreach ($weekly_series as $w) {
 
 $csv_url = wp_nonce_url(
     add_query_arg(['page' => \Champlin\InternalLinker\Admin\InsightsPage::MENU_SLUG, 'export' => 'csv']),
-    'cil_insights_csv',
-    '_cilnonce'
+    'chail_insights_csv',
+    '_chailnonce'
 );
 
 // Format minutes-saved as "Xh Ym"
@@ -54,28 +54,28 @@ $editor_hourly = 45;
 $time_value = round(($minutes_saved / 60) * $editor_hourly, 2);
 $roi_multiple = $cost > 0 ? round($time_value / $cost, 0) : 0;
 ?>
-<div class="wrap cil-wrap">
-    <div class="cil-app">
+<div class="wrap chail-wrap">
+    <div class="chail-app">
 
-        <header class="cil-app-header">
-            <div class="cil-app-title">
-                <div class="cil-app-eyebrow">
+        <header class="chail-app-header">
+            <div class="chail-app-title">
+                <div class="chail-app-eyebrow">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
                     AI Linker · Insights
                 </div>
                 <h1><?php esc_html_e('What the plugin has done for you.', 'champlin-ai-internal-linker'); ?></h1>
-                <p class="cil-app-subtitle">
+                <p class="chail-app-subtitle">
                     <?php esc_html_e('Editorial impact + return on the modest OpenAI bill. Updated every time you accept a suggestion.', 'champlin-ai-internal-linker'); ?>
                 </p>
             </div>
-            <div class="cil-app-actions">
+            <div class="chail-app-actions">
                 <?php if ($total_inserted > 0) : ?>
-                    <a href="<?php echo esc_url($csv_url); ?>" class="cil-btn cil-btn-ghost cil-btn-sm">
+                    <a href="<?php echo esc_url($csv_url); ?>" class="chail-btn chail-btn-ghost chail-btn-sm">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         <?php esc_html_e('Export CSV', 'champlin-ai-internal-linker'); ?>
                     </a>
-                    <span class="cil-pill cil-pill-success">
-                        <span class="cil-pill-dot"></span>
+                    <span class="chail-pill chail-pill-success">
+                        <span class="chail-pill-dot"></span>
                         <?php
                         printf(
                             /* translators: %d: total number of internal links inserted by the plugin. */
@@ -85,8 +85,8 @@ $roi_multiple = $cost > 0 ? round($time_value / $cost, 0) : 0;
                         ?>
                     </span>
                 <?php else : ?>
-                    <span class="cil-pill cil-pill-idle">
-                        <span class="cil-pill-dot"></span>
+                    <span class="chail-pill chail-pill-idle">
+                        <span class="chail-pill-dot"></span>
                         <?php esc_html_e('No accepted links yet', 'champlin-ai-internal-linker'); ?>
                     </span>
                 <?php endif; ?>
@@ -94,11 +94,11 @@ $roi_multiple = $cost > 0 ? round($time_value / $cost, 0) : 0;
         </header>
 
         <!-- Hero ROI cards -->
-        <div class="cil-grid cil-grid-3" style="margin-bottom: 1.25rem;">
-            <div class="cil-stat cil-stat--accent">
-                <span class="cil-stat-label"><?php esc_html_e('Links inserted', 'champlin-ai-internal-linker'); ?></span>
-                <span class="cil-stat-value tabular-nums"><?php echo esc_html((string) $total_inserted); ?></span>
-                <span class="cil-stat-meta">
+        <div class="chail-grid chail-grid-3" style="margin-bottom: 1.25rem;">
+            <div class="chail-stat chail-stat--accent">
+                <span class="chail-stat-label"><?php esc_html_e('Links inserted', 'champlin-ai-internal-linker'); ?></span>
+                <span class="chail-stat-value tabular-nums"><?php echo esc_html((string) $total_inserted); ?></span>
+                <span class="chail-stat-meta">
                     <?php
                     if ($inserted_30d > 0) {
                         /* translators: %d: number of links inserted in the last 30 days. */
@@ -109,20 +109,20 @@ $roi_multiple = $cost > 0 ? round($time_value / $cost, 0) : 0;
                     ?>
                 </span>
             </div>
-            <div class="cil-stat cil-stat--accent">
-                <span class="cil-stat-label"><?php esc_html_e('Editor time saved', 'champlin-ai-internal-linker'); ?></span>
-                <span class="cil-stat-value tabular-nums"><?php echo esc_html($time_saved_label); ?></span>
-                <span class="cil-stat-meta">
+            <div class="chail-stat chail-stat--accent">
+                <span class="chail-stat-label"><?php esc_html_e('Editor time saved', 'champlin-ai-internal-linker'); ?></span>
+                <span class="chail-stat-value tabular-nums"><?php echo esc_html($time_saved_label); ?></span>
+                <span class="chail-stat-meta">
                     <?php
                     /* translators: %d: minutes per link estimate. */
                     printf(esc_html__('At %d min per manually-found internal link', 'champlin-ai-internal-linker'), (int) \Champlin\InternalLinker\Reports\InsightsReport::MINUTES_PER_LINK);
                     ?>
                 </span>
             </div>
-            <div class="cil-stat cil-stat--accent">
-                <span class="cil-stat-label"><?php esc_html_e('Pages improved', 'champlin-ai-internal-linker'); ?></span>
-                <span class="cil-stat-value tabular-nums"><?php echo esc_html((string) $pages_improved); ?></span>
-                <span class="cil-stat-meta">
+            <div class="chail-stat chail-stat--accent">
+                <span class="chail-stat-label"><?php esc_html_e('Pages improved', 'champlin-ai-internal-linker'); ?></span>
+                <span class="chail-stat-value tabular-nums"><?php echo esc_html((string) $pages_improved); ?></span>
+                <span class="chail-stat-meta">
                     <?php esc_html_e('Distinct source posts that received at least one inbound link', 'champlin-ai-internal-linker'); ?>
                 </span>
             </div>
@@ -130,8 +130,8 @@ $roi_multiple = $cost > 0 ? round($time_value / $cost, 0) : 0;
 
         <!-- ROI math callout -->
         <?php if ($total_inserted > 0) : ?>
-        <section class="cil-card cil-card--striped" style="margin-bottom: 1.25rem;">
-            <div class="cil-card-body">
+        <section class="chail-card chail-card--striped" style="margin-bottom: 1.25rem;">
+            <div class="chail-card-body">
                 <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
                     <div style="flex:1 1 18rem;">
                         <h2 style="margin:0 0 0.45rem;font-family:'Space Grotesk',sans-serif;font-size:1.15rem;color:#0f172a;">
@@ -182,11 +182,11 @@ $roi_multiple = $cost > 0 ? round($time_value / $cost, 0) : 0;
         <?php endif; ?>
 
         <!-- Secondary stats -->
-        <div class="cil-grid cil-grid-3" style="margin-bottom: 1.25rem;">
-            <div class="cil-stat">
-                <span class="cil-stat-label"><?php esc_html_e('Suggestions delivered', 'champlin-ai-internal-linker'); ?></span>
-                <span class="cil-stat-value tabular-nums"><?php echo esc_html((string) $delivered); ?></span>
-                <span class="cil-stat-meta">
+        <div class="chail-grid chail-grid-3" style="margin-bottom: 1.25rem;">
+            <div class="chail-stat">
+                <span class="chail-stat-label"><?php esc_html_e('Suggestions delivered', 'champlin-ai-internal-linker'); ?></span>
+                <span class="chail-stat-value tabular-nums"><?php echo esc_html((string) $delivered); ?></span>
+                <span class="chail-stat-meta">
                     <?php
                     printf(
                         /* translators: %d: percentage of suggestions that were accepted. */
@@ -196,10 +196,10 @@ $roi_multiple = $cost > 0 ? round($time_value / $cost, 0) : 0;
                     ?>
                 </span>
             </div>
-            <div class="cil-stat">
-                <span class="cil-stat-label"><?php esc_html_e('Indexed posts', 'champlin-ai-internal-linker'); ?></span>
-                <span class="cil-stat-value tabular-nums"><?php echo esc_html((string) $indexed); ?></span>
-                <span class="cil-stat-meta">
+            <div class="chail-stat">
+                <span class="chail-stat-label"><?php esc_html_e('Indexed posts', 'champlin-ai-internal-linker'); ?></span>
+                <span class="chail-stat-value tabular-nums"><?php echo esc_html((string) $indexed); ?></span>
+                <span class="chail-stat-meta">
                     <?php
                     printf(
                         /* translators: %s: embedding storage size in kilobytes (formatted with thousands separator). */
@@ -209,10 +209,10 @@ $roi_multiple = $cost > 0 ? round($time_value / $cost, 0) : 0;
                     ?>
                 </span>
             </div>
-            <div class="cil-stat">
-                <span class="cil-stat-label"><?php esc_html_e('Orphan exposure', 'champlin-ai-internal-linker'); ?></span>
-                <span class="cil-stat-value tabular-nums"><?php echo esc_html((string) $orphan_count); ?></span>
-                <span class="cil-stat-meta">
+            <div class="chail-stat">
+                <span class="chail-stat-label"><?php esc_html_e('Orphan exposure', 'champlin-ai-internal-linker'); ?></span>
+                <span class="chail-stat-value tabular-nums"><?php echo esc_html((string) $orphan_count); ?></span>
+                <span class="chail-stat-meta">
                     <?php
                     /* translators: 1: percentage of orphans across eligible published posts */
                     printf(esc_html__('%d%% of published posts have zero inbound links', 'champlin-ai-internal-linker'), (int) round($orphan_ratio * 100));
@@ -240,17 +240,17 @@ $roi_multiple = $cost > 0 ? round($time_value / $cost, 0) : 0;
             $bar_h_max = $chart_h - $padding_t - $padding_b;
             $y_scale = $max_weekly > 0 ? $bar_h_max / $max_weekly : 0;
         ?>
-        <section class="cil-card" style="margin-bottom: 1.25rem;">
-            <header class="cil-card-header">
+        <section class="chail-card" style="margin-bottom: 1.25rem;">
+            <header class="chail-card-header">
                 <div>
                     <h2><?php esc_html_e('Activity — last 8 weeks', 'champlin-ai-internal-linker'); ?></h2>
-                    <p class="cil-help"><?php esc_html_e('Accepted inline-link inserts per ISO week. Empty weeks render as zero so dips are visible.', 'champlin-ai-internal-linker'); ?></p>
+                    <p class="chail-help"><?php esc_html_e('Accepted inline-link inserts per ISO week. Empty weeks render as zero so dips are visible.', 'champlin-ai-internal-linker'); ?></p>
                 </div>
             </header>
-            <div class="cil-card-body">
+            <div class="chail-card-body">
                 <svg viewBox="0 0 <?php echo (int) $chart_w; ?> <?php echo (int) $chart_h; ?>" preserveAspectRatio="xMidYMid meet" role="img" aria-label="<?php esc_attr_e('Weekly accepted links over the last 8 weeks', 'champlin-ai-internal-linker'); ?>" style="width:100%;max-width:720px;height:auto;display:block;">
                     <defs>
-                        <linearGradient id="cilBarGradient" x1="0" y1="0" x2="0" y2="1">
+                        <linearGradient id="chailBarGradient" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stop-color="#5eead4" stop-opacity="0.95"/>
                             <stop offset="100%" stop-color="#14b8a6" stop-opacity="0.85"/>
                         </linearGradient>
@@ -270,7 +270,7 @@ $roi_multiple = $cost > 0 ? round($time_value / $cost, 0) : 0;
                         $x = $padding_l + $i * ($bar_w + $bar_gap);
                         $y = $padding_t + $bar_h_max - $h;
                     ?>
-                        <rect x="<?php echo (int) $x; ?>" y="<?php echo (int) $y; ?>" width="<?php echo (int) $bar_w; ?>" height="<?php echo (int) $h; ?>" rx="3" fill="url(#cilBarGradient)">
+                        <rect x="<?php echo (int) $x; ?>" y="<?php echo (int) $y; ?>" width="<?php echo (int) $bar_w; ?>" height="<?php echo (int) $h; ?>" rx="3" fill="url(#chailBarGradient)">
                             <?php /* translators: 1: number of accepted links in the week, 2: human-readable week label (e.g. "Apr 14"). */ ?>
                             <title><?php echo esc_html(sprintf(_n('%1$d link in week of %2$s', '%1$d links in week of %2$s', $w['inserts'], 'champlin-ai-internal-linker'), $w['inserts'], $w['week_label'])); ?></title>
                         </rect>
@@ -288,16 +288,16 @@ $roi_multiple = $cost > 0 ? round($time_value / $cost, 0) : 0;
              Most active editors
              ============================================================ -->
         <?php if (!empty($top_authors)) : ?>
-        <section class="cil-card" style="margin-bottom: 1.25rem;">
-            <header class="cil-card-header">
+        <section class="chail-card" style="margin-bottom: 1.25rem;">
+            <header class="chail-card-header">
                 <div>
                     <h2><?php esc_html_e('Most active editors', 'champlin-ai-internal-linker'); ?></h2>
-                    <p class="cil-help"><?php esc_html_e('Inserts attributed to the author of the source post. Useful for multi-author sites tracking who\'s using the plugin.', 'champlin-ai-internal-linker'); ?></p>
+                    <p class="chail-help"><?php esc_html_e('Inserts attributed to the author of the source post. Useful for multi-author sites tracking who\'s using the plugin.', 'champlin-ai-internal-linker'); ?></p>
                 </div>
             </header>
-            <div class="cil-card-body--flush">
-                <div class="cil-table-wrap">
-                    <table class="cil-table">
+            <div class="chail-card-body--flush">
+                <div class="chail-table-wrap">
+                    <table class="chail-table">
                         <thead>
                             <tr>
                                 <th><?php esc_html_e('Editor', 'champlin-ai-internal-linker'); ?></th>
@@ -342,26 +342,26 @@ $roi_multiple = $cost > 0 ? round($time_value / $cost, 0) : 0;
         <?php endif; ?>
 
         <!-- Top targets -->
-        <section class="cil-card">
-            <header class="cil-card-header">
+        <section class="chail-card">
+            <header class="chail-card-header">
                 <div>
                     <h2><?php esc_html_e('Most-linked target posts', 'champlin-ai-internal-linker'); ?></h2>
-                    <p class="cil-help"><?php esc_html_e('Where the inbound link juice is flowing. Tells you what your topical-authority centers are becoming.', 'champlin-ai-internal-linker'); ?></p>
+                    <p class="chail-help"><?php esc_html_e('Where the inbound link juice is flowing. Tells you what your topical-authority centers are becoming.', 'champlin-ai-internal-linker'); ?></p>
                 </div>
             </header>
 
             <?php if ($insights['top_targets'] === []) : ?>
-                <div class="cil-empty">
-                    <div class="cil-empty-icon">
+                <div class="chail-empty">
+                    <div class="chail-empty-icon">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                     </div>
                     <h3><?php esc_html_e('No accepted suggestions yet', 'champlin-ai-internal-linker'); ?></h3>
                     <p><?php esc_html_e('Open any post in the editor and accept a sidebar suggestion. This table fills in real-time as your editors approve links.', 'champlin-ai-internal-linker'); ?></p>
                 </div>
             <?php else : ?>
-                <div class="cil-card-body--flush">
-                    <div class="cil-table-wrap">
-                        <table class="cil-table">
+                <div class="chail-card-body--flush">
+                    <div class="chail-table-wrap">
+                        <table class="chail-table">
                             <thead>
                                 <tr>
                                     <th><?php esc_html_e('Target post', 'champlin-ai-internal-linker'); ?></th>
@@ -372,10 +372,10 @@ $roi_multiple = $cost > 0 ? round($time_value / $cost, 0) : 0;
                             <tbody>
                                 <?php foreach ($insights['top_targets'] as $row) : ?>
                                     <tr>
-                                        <td class="cil-table-cell-link">
+                                        <td class="chail-table-cell-link">
                                             <a href="<?php echo esc_url(get_edit_post_link($row['post_id'])); ?>"><?php echo esc_html($row['title']); ?></a>
                                             <div style="font-size:0.72rem;color:#94a3b8;margin-top:0.15rem;">
-                                                <span class="cil-mono">#<?php echo esc_html((string) $row['post_id']); ?></span>
+                                                <span class="chail-mono">#<?php echo esc_html((string) $row['post_id']); ?></span>
                                                 ·
                                                 <a href="<?php echo esc_url($row['permalink']); ?>" target="_blank" rel="noopener" style="color:#94a3b8;">
                                                     <?php echo esc_html(wp_parse_url($row['permalink'], PHP_URL_PATH) ?: $row['permalink']); ?> ↗
@@ -383,12 +383,12 @@ $roi_multiple = $cost > 0 ? round($time_value / $cost, 0) : 0;
                                             </div>
                                         </td>
                                         <td style="text-align:right;">
-                                            <span class="cil-pill cil-pill-success" style="font-weight:500;font-family:'JetBrains Mono',monospace;letter-spacing:normal;text-transform:none;">
+                                            <span class="chail-pill chail-pill-success" style="font-weight:500;font-family:'JetBrains Mono',monospace;letter-spacing:normal;text-transform:none;">
                                                 <?php echo esc_html((string) $row['inserts']); ?>
                                             </span>
                                         </td>
-                                        <td class="cil-table-actions">
-                                            <a href="<?php echo esc_url(get_edit_post_link($row['post_id'])); ?>" class="cil-btn cil-btn-ghost cil-btn-sm">
+                                        <td class="chail-table-actions">
+                                            <a href="<?php echo esc_url(get_edit_post_link($row['post_id'])); ?>" class="chail-btn chail-btn-ghost chail-btn-sm">
                                                 <?php esc_html_e('Edit', 'champlin-ai-internal-linker'); ?>
                                             </a>
                                         </td>
@@ -403,16 +403,16 @@ $roi_multiple = $cost > 0 ? round($time_value / $cost, 0) : 0;
 
         <!-- Recent activity -->
         <?php if ($insights['recent_activity'] !== []) : ?>
-        <section class="cil-card">
-            <header class="cil-card-header">
+        <section class="chail-card">
+            <header class="chail-card-header">
                 <div>
                     <h2><?php esc_html_e('Recent activity', 'champlin-ai-internal-linker'); ?></h2>
-                    <p class="cil-help"><?php esc_html_e('The last 10 accepted inline links.', 'champlin-ai-internal-linker'); ?></p>
+                    <p class="chail-help"><?php esc_html_e('The last 10 accepted inline links.', 'champlin-ai-internal-linker'); ?></p>
                 </div>
             </header>
-            <div class="cil-card-body--flush">
-                <div class="cil-table-wrap">
-                    <table class="cil-table">
+            <div class="chail-card-body--flush">
+                <div class="chail-table-wrap">
+                    <table class="chail-table">
                         <thead>
                             <tr>
                                 <th><?php esc_html_e('Source post', 'champlin-ai-internal-linker'); ?></th>
@@ -424,18 +424,18 @@ $roi_multiple = $cost > 0 ? round($time_value / $cost, 0) : 0;
                         <tbody>
                             <?php foreach ($insights['recent_activity'] as $row) : ?>
                                 <tr>
-                                    <td class="cil-table-cell-link">
+                                    <td class="chail-table-cell-link">
                                         <a href="<?php echo esc_url(get_edit_post_link($row['source_post_id'])); ?>"><?php echo esc_html($row['source_title']); ?></a>
                                     </td>
-                                    <td class="cil-table-cell-link">
+                                    <td class="chail-table-cell-link">
                                         <a href="<?php echo esc_url(get_edit_post_link($row['target_post_id'])); ?>"><?php echo esc_html($row['target_title']); ?></a>
                                     </td>
                                     <td>
-                                        <span class="cil-mono" style="font-size:0.78rem;color:#0e7490;background:rgba(94,234,212,0.12);padding:0.15rem 0.5rem;border-radius:4px;">
+                                        <span class="chail-mono" style="font-size:0.78rem;color:#0e7490;background:rgba(94,234,212,0.12);padding:0.15rem 0.5rem;border-radius:4px;">
                                             <?php echo esc_html(number_format($row['similarity'], 3)); ?>
                                         </span>
                                     </td>
-                                    <td class="cil-table-modified">
+                                    <td class="chail-table-modified">
                                         <?php echo esc_html(human_time_diff(strtotime($row['created_at']), time()) . ' ' . __('ago', 'champlin-ai-internal-linker')); ?>
                                     </td>
                                 </tr>
@@ -447,13 +447,13 @@ $roi_multiple = $cost > 0 ? round($time_value / $cost, 0) : 0;
         </section>
         <?php endif; ?>
 
-        <footer class="cil-app-footer">
+        <footer class="chail-app-footer">
             <span>
                 <?php esc_html_e('Engineered by', 'champlin-ai-internal-linker'); ?>
                 <a href="https://champlinenterprises.com" target="_blank" rel="noopener">Champlin Enterprises</a>
             </span>
-            <?php if ($cil_version) : ?>
-                <span class="cil-version-chip">v<?php echo esc_html($cil_version); ?></span>
+            <?php if ($chail_version) : ?>
+                <span class="chail-version-chip">v<?php echo esc_html($chail_version); ?></span>
             <?php endif; ?>
         </footer>
     </div>

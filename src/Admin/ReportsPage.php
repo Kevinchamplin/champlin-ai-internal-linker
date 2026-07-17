@@ -40,31 +40,31 @@ final class ReportsPage
             wp_die(esc_html__('Administrator capability required.', 'champlin-ai-internal-linker'));
         }
 
-        $force  = isset($_GET['rescan']) && check_admin_referer('cil_rescan_orphans', '_cilnonce');
+        $force  = isset($_GET['rescan']) && check_admin_referer('chail_rescan_orphans', '_chailnonce');
         $report = $this->orphan_report->generate((bool) $force);
 
         wp_enqueue_script(
-            'cil-reports',
-            CIL_URL . 'assets/admin/reports.js',
+            'chail-reports',
+            CHAIL_URL . 'assets/admin/reports.js',
             ['wp-api-fetch'],
-            CIL_VERSION,
+            CHAIL_VERSION,
             true
         );
-        wp_localize_script('cil-reports', 'cilReports', [
+        wp_localize_script('chail-reports', 'chailReports', [
             'nonce' => wp_create_nonce('wp_rest'),
-            'rest'  => esc_url_raw(rest_url('cil/v1/reports')),
+            'rest'  => esc_url_raw(rest_url('chail/v1/reports')),
         ]);
 
-        $css = CIL_DIR . 'assets/dist/admin/admin.css';
+        $css = CHAIL_DIR . 'assets/dist/admin/admin.css';
         if (file_exists($css)) {
             wp_enqueue_style(
-                'cil-admin',
-                CIL_URL . 'assets/dist/admin/admin.css',
+                'chail-admin',
+                CHAIL_URL . 'assets/dist/admin/admin.css',
                 [],
                 (string) filemtime($css)
             );
         }
 
-        require CIL_DIR . 'includes/views/reports.php';
+        require CHAIL_DIR . 'includes/views/reports.php';
     }
 }

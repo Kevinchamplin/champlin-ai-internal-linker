@@ -34,7 +34,7 @@ use WP_Post;
 
 final class AnchorExtractor
 {
-    private const TRANSIENT_PREFIX = 'cil_src_sent_';
+    private const TRANSIENT_PREFIX = 'chail_src_sent_';
     private const TRANSIENT_TTL    = HOUR_IN_SECONDS * 12;
 
     /**

@@ -1,7 +1,7 @@
 <?php
 /**
- * GET  /cil/v1/reports/orphans
- * POST /cil/v1/reports/rescan
+ * GET  /chail/v1/reports/orphans
+ * POST /chail/v1/reports/rescan
  *
  * @package Champlin\InternalLinker\REST
  */

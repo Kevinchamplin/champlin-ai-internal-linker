@@ -1,6 +1,6 @@
 <?php
 /**
- * CRUD on the cil_embeddings table.
+ * CRUD on the chail_embeddings table.
  *
  * Embeddings are stored as packed float32 BLOBs to keep row size predictable
  * (~6KB for the default 1536-dim text-embedding-3-small model).

@@ -91,8 +91,8 @@ final class Plugin
     public static function on_deactivate(): void
     {
         if (function_exists('as_unschedule_all_actions')) {
-            as_unschedule_all_actions('cil_index_post');
-            as_unschedule_all_actions('cil_bulk_index_batch');
+            as_unschedule_all_actions('chail_index_post');
+            as_unschedule_all_actions('chail_bulk_index_batch');
         }
     }
 
@@ -156,8 +156,8 @@ final class Plugin
 
         // Indexing pipeline.
         add_action('save_post', [$this->index_queue, 'on_save_post'], 20, 3);
-        add_action('cil_index_post', [$this->index_queue, 'run'], 10, 1);
-        add_action('cil_bulk_index_batch', [$this->bulk_indexer, 'run_batch'], 10, 1);
+        add_action('chail_index_post', [$this->index_queue, 'run'], 10, 1);
+        add_action('chail_bulk_index_batch', [$this->bulk_indexer, 'run_batch'], 10, 1);
         add_action('before_delete_post', [$this->vector_store, 'delete'], 10, 1);
 
         // Admin UI.
@@ -185,8 +185,7 @@ final class Plugin
          *
          * @param Plugin $plugin The Free plugin container instance.
          */
-        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Public extension hook; "cil_" is this plugin's established public-API prefix (LinkWeaver Pro depends on it).
-        do_action('cil_plugin_loaded', $this);
+        do_action('chail_plugin_loaded', $this);
     }
 
     public function vector_store(): VectorStore

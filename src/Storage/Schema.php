@@ -11,33 +11,33 @@ namespace Champlin\InternalLinker\Storage;
 
 final class Schema
 {
-    public const OPTION_DB_VERSION = 'cil_db_version';
+    public const OPTION_DB_VERSION = 'chail_db_version';
 
     public static function install(): void
     {
         self::run_migrations();
-        update_option(self::OPTION_DB_VERSION, CIL_DB_VERSION, false);
+        update_option(self::OPTION_DB_VERSION, CHAIL_DB_VERSION, false);
     }
 
     public static function maybe_upgrade(): void
     {
         $current = get_option(self::OPTION_DB_VERSION, '0');
-        if (version_compare((string) $current, CIL_DB_VERSION, '<')) {
+        if (version_compare((string) $current, CHAIL_DB_VERSION, '<')) {
             self::run_migrations();
-            update_option(self::OPTION_DB_VERSION, CIL_DB_VERSION, false);
+            update_option(self::OPTION_DB_VERSION, CHAIL_DB_VERSION, false);
         }
     }
 
     public static function table_embeddings(): string
     {
         global $wpdb;
-        return $wpdb->prefix . 'cil_embeddings';
+        return $wpdb->prefix . 'chail_embeddings';
     }
 
     public static function table_suggestion_log(): string
     {
         global $wpdb;
-        return $wpdb->prefix . 'cil_suggestion_log';
+        return $wpdb->prefix . 'chail_suggestion_log';
     }
 
     private static function run_migrations(): void
