@@ -4,7 +4,7 @@ Tags: internal links, seo, embeddings, ai, suggestions
 Requires at least: 6.4
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.3.4
+Stable tag: 1.3.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -94,6 +94,9 @@ GitHub: https://github.com/Kevinchamplin/champlin-ai-internal-linker
 3. Bulk re-index progress UI.
 
 == Changelog ==
+
+= 1.3.5 =
+* Fix: A failing embedding request can no longer break saving a post. On sites without Action Scheduler the indexer runs inline during `save_post`, and an error from the embedding provider (for example a rate-limit response) was bubbling up and stopping the save. Indexing is best-effort and is now skipped silently when it fails.
 
 = 1.3.4 =
 * Change: Renamed every internal identifier from the short `cil`/`CIL_` prefix to `chail`/`CHAIL_` — constants, action/filter hooks, options, transients, script and style handles, the REST route namespace, and the two custom database tables — so nothing can collide with other plugins. The public extension filters are now `chail_provider`, `chail_provider_summary`, `chail_settings_render_extra`, `chail_extra_excluded_ids`, `chail_rank_results`, and `chail_suggestion_row`.

@@ -63,7 +63,17 @@ final class IndexQueue
             as_enqueue_async_action(self::HOOK, ['post_id' => $post_id], 'champlin-ai-internal-linker');
         } else {
             // Action Scheduler not present — run inline as a fallback.
-            $this->run($post_id);
+            //
+            // run() re-throws so Action Scheduler can retry, but inline we are
+            // inside the save_post hook: an uncaught throw here white-screens
+            // every page and post save on the site (seen in the wild when the
+            // embedding provider returned HTTP 429). Indexing is best-effort
+            // and must never be able to break a save. run() already logs.
+            try {
+                $this->run($post_id);
+            } catch (Throwable $e) {
+                return;
+            }
         }
     }
 
